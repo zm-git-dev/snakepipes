@@ -162,7 +162,7 @@ def run_allelesp_mapping():
 def run_UCSCTracks():
     if UCSCTracksGenome is not None:
         file_list = [
-            expand("bamCoverage/{sample}.filtered.seq_depth_norm.UCSC_chroms.bw", sample = samples)
+            expand("bamCoverage/UCSC_tracks/{sample}.filtered.seq_depth_norm.UCSC_chroms.bw", sample = samples)
             ]
         return(file_list)
     else:
