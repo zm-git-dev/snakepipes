@@ -159,6 +159,15 @@ def run_allelesp_mapping():
     else:
         return([])
 
+def run_UCSCTracks():
+    if UCSCTracksGenome is not None:
+        file_list = [
+            expand("bamCoverage/{sample}.filtered.seq_depth_norm.UCSC_chroms.bw", sample = samples)
+            ]
+        return(file_list)
+    else:
+        return([])
+
 ### execute before workflow starts #############################################
 ################################################################################
 onstart:
@@ -194,6 +203,7 @@ rule all:
         expand("bamCoverage/{sample}.filtered.seq_depth_norm.bw", sample = samples),
         run_computeGCBias(gcbias),
         run_deepTools_qc(),
+        run_UCSCTracks(),
         run_Qualimap(),
         make_nmasked_genome(),
         run_allelesp_mapping(),

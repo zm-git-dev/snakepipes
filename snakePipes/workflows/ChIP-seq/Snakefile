@@ -88,6 +88,19 @@ def run_CSAW():
         return( ["CSAW/CSAW.session_info.txt"] )
     else:
         return([])
+    
+def run_UCSCTracks():
+    if UCSCTracksGenome is not None:
+        file_list = []
+        for chip_sample in chip_samples_w_ctrl:
+            control_name = get_control_name(chip_sample)
+            file_list.append([
+                "deepTools_ChIP/bamCompare/UCSC_tracks/"+chip_sample+".filtered.subtract."+control_name+".UCSC_chroms.bw",
+                "deepTools_ChIP/bamCompare/UCSC_tracks/"+chip_sample+".filtered.log2ratio.over_"+control_name+".UCSC_chroms.bw"
+                ])
+        return(file_list)
+    else:
+        return([])
 
 ### execute before workflow starts #############################################
 ################################################################################
@@ -126,13 +139,13 @@ rule all:
         run_deepTools(),
         expand("MACS2/{chip_sample}.filtered.BAM_peaks.xls", chip_sample = chip_samples),
         expand("MACS2/{chip_sample}.filtered.BAM_peaks.qc.txt", chip_sample = chip_samples),
-
         # run histoneHMM if allelic_bams are absent (since it gives index error without allele_specific index)
         run_histoneHMM(allele_info),
         ## run deeptools-allelic only if dir "allelic_bams" present and non empty
         run_deepTools_allelic(),
         ## run csaw if asked for
         run_CSAW(),
+        run_UCSCTracks(),
         "QC_report/QC_report_all.tsv"
 
 ### execute after workflow finished ############################################

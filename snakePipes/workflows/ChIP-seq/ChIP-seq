@@ -71,6 +71,12 @@ def parse_args(defaults={"verbose": False, "configfile": None, "cluster_configfi
                           dest="predict_chip_dict",
                           action="store_true",
                           help="Use existing bam files to predict a chip-seq sample configuration file. Write it to the workingdir")
+    
+    optional.add_argument("--UCSCtracks",
+                          dest="UCSCTracksGenome",
+                          help="Produce also UCSC conform bigwig tracks. Please provide the genome assembly corresponding to your selected genome config file! (eg. GRCh37, GRCm38, BDGP6)"
+                          " (default: '%(default)s')",
+                          default=defaults["UCSCTracksGenome"])
 
     return parser
 
