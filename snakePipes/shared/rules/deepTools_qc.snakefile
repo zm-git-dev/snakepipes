@@ -51,7 +51,7 @@ rule bamCoverage_filtered:
 
 # TODO: include blacklist!? use deeptools bam filtering options?
 
-rule altTracks_bamCoverage_filtered:
+rule bamCoverage_filtered_UCSC:
     input:
         "bamCoverage/{sample}.filtered.seq_depth_norm.bw"
     output:

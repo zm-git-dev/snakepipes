@@ -50,7 +50,7 @@ rule bamCompare_log2:
 
 ### Convert to UCSC tracks ###################################################
 
-rule altTracks_bamCompare_filtered:
+rule bamCompare_UCSC:
     input:
         bw_subtract="deepTools_ChIP/bamCompare/{chip_sample}.filtered.subtract.{control_name}.bw",
         bw_log2="deepTools_ChIP/bamCompare/{chip_sample}.filtered.log2ratio.over_{control_name}.bw"
