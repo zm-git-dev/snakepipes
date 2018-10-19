@@ -16,7 +16,9 @@ def set_env_yamls():
     This defines the global variables describing where the conda env yaml files are
     """
     return {'CONDA_SHARED_ENV': 'envs/shared.yaml',
+            'CONDA_CREATE_INDEX_ENV': 'envs/createIndices.yaml',
             'CONDA_RNASEQ_ENV': 'envs/rna_seq.yaml',
+            'CONDA_scRNASEQ_ENV': 'envs/sc_rna_seq.yaml',
             'CONDA_DNA_MAPPING_ENV': 'envs/dna_mapping.yaml',
             'CONDA_CHIPSEQ_ENV': 'envs/chip_seq.yaml',
             'CONDA_ATAC_ENV': 'envs/atac_seq.yaml',
@@ -97,6 +99,17 @@ def get_sample_names(infiles, ext, reads):
             x = x.replace(reads[0], "").replace(reads[1], "")
         except IndexError:
             pass
+        s.append(x)
+    return sorted(list(set(s)))
+
+
+def get_sample_names_bam(infiles, bam_ext):
+    """
+    Get sample names without file extensions
+    """
+    s = []
+    for x in infiles:
+        x = os.path.basename(x).replace(bam_ext, "")
         s.append(x)
     return sorted(list(set(s)))
 
@@ -238,9 +251,11 @@ def setDefaults(fileName):
     return baseDir, workflowDir, defaults
 
 
-def checkCommonArguments(args, baseDir, outDir=False):
+def checkCommonArguments(args, baseDir, outDir=False, createIndices=False):
     """
     Check the wrapper arguments
+
+    The createIndices workflow disables some of this
     """
     # Some workflows use a working dir, others and outdir
     if outDir:
@@ -250,17 +265,18 @@ def checkCommonArguments(args, baseDir, outDir=False):
         args.workingdir = os.path.abspath(args.workingdir)
 
     # 1. Dir path
-    if outDir:
-        if os.path.exists(args.indir):
-            args.indir = os.path.abspath(args.indir)
+    if not createIndices:
+        if outDir:
+            if os.path.exists(args.indir):
+                args.indir = os.path.abspath(args.indir)
+            else:
+                sys.exit("\nError! Input dir not found! ({})\n".format(args.indir))
         else:
-            sys.exit("\nError! Input dir not found! ({})\n".format(args.indir))
-    else:
-        if os.path.exists(args.workingdir):
-            args.workingdir = os.path.abspath(args.workingdir)
-        else:
-            sys.exit("\nError! Working-dir (-d) dir not found! ({})\n".format(args.workingdir))
-        args.outdir = args.workingdir
+            if os.path.exists(args.workingdir):
+                args.workingdir = os.path.abspath(args.workingdir)
+            else:
+                sys.exit("\nError! Working-dir (-d) dir not found! ({})\n".format(args.workingdir))
+            args.outdir = args.workingdir
     args.cluster_logs_dir = os.path.join(args.outdir, "cluster_logs")
     # 2. Config file
     if args.configfile and not os.path.exists(args.configfile):
@@ -274,8 +290,9 @@ def checkCommonArguments(args, baseDir, outDir=False):
         if not check_sample_info_header(args.sample_info):
             sys.exit("ERROR: Please use 'name' and 'condition' as column headers in sample info file! ({})\n".format(args.sample_info))
     # 4. get abspath from user provided genome/organism file
-    if not os.path.isfile(os.path.join(baseDir, "shared/organisms/{}.yaml".format(args.genome))) and os.path.isfile(args.genome):
-        args.genome = os.path.abspath(args.genome)
+    if not createIndices:
+        if not os.path.isfile(os.path.join(baseDir, "shared/organisms/{}.yaml".format(args.genome))) and os.path.isfile(args.genome):
+            args.genome = os.path.abspath(args.genome)
 
 
 def commonYAMLandLogs(baseDir, workflowDir, defaults, args, callingScript):
@@ -308,6 +325,9 @@ def commonYAMLandLogs(baseDir, workflowDir, defaults, args, callingScript):
         user_cluster_config = load_configfile(args.cluster_configfile, False)
         cluster_config = merge_dicts(cluster_config, user_cluster_config)  # merge/override variables from user_config.yaml
     write_configfile(os.path.join(args.outdir, '{}.cluster_config.yaml'.format(workflowName)), cluster_config)
+
+    if args.notemp:
+        args.snakemake_options += " --notemp"
 
     snakemake_cmd = """
                     {snakemake} {snakemake_options} --latency-wait {latency_wait} --snakefile {snakefile} --jobs {max_jobs} --directory {workingdir} --configfile {configfile} --keep-going
@@ -416,8 +436,8 @@ def predict_chip_dict(wdir):
     chip_dict is written as yaml to current workflow workingdir
     predicts whether a sample is broad or narrow based on histone mark pattern
     """
-    pat = re.compile(r"input.*$", re.IGNORECASE)
-
+    pat1 = re.compile(r"input.*$", re.IGNORECASE)
+    pat2 = re.compile(r"^.*input", re.IGNORECASE)
     infiles = sorted(glob.glob(os.path.join(wdir, 'filtered_bam/', '*.bam')))
     samples = get_sample_names(infiles, ".filtered.bam", ['', ''])
 
@@ -426,22 +446,60 @@ def predict_chip_dict(wdir):
     print("---------------------------------------------------------------------------------------")
     print("Predict Chip-seq sample configuration")
     print("---------------------------------------------------------------------------------------")
-    print("\nCheck identified samples...")
+    print("\nSearch for Input/control samples...")
+
+    input_samples = set([])
     for i in samples:
-        print(" " + i + "... ")
         if re.match(r".*input.*", i, re.IGNORECASE):
-            print("\n", "control/input sample found! Try to find corresponding ChIP samples...")
-            c_prefix = pat.sub("", i)
-            for j in samples:
-                if j != i and re.match(r".*" + c_prefix + ".*", j, re.IGNORECASE):
-                    print("  ", i, " --> ", j)
-                    chip_dict_pred["chip_dict"][j] = {}
-                    chip_dict_pred["chip_dict"][j]['control'] = i
-                    if re.match(".*(H3K4me1|H3K36me3|H3K9me3|H3K27me3).*", j, re.IGNORECASE):
-                        chip_dict_pred["chip_dict"][j]['broad'] = True
-                    else:
-                        chip_dict_pred["chip_dict"][j]['broad'] = False
-            print("")
+            print("...found: ", i)
+            input_samples.add(i)
+
+    print("\nTry to find corresponding ChIP samples...")
+    final_matches = set()
+    for i in samples:
+        if i in input_samples:
+            continue
+
+        print("\n sample: ", i)
+
+        prefix_matches = set([])
+        suffix_matches = set([])
+
+        for j in input_samples:
+            c_prefix = pat1.sub("", j)
+            c_suffix = pat2.sub("", j)
+
+            if re.match(r"^" + c_prefix + ".*", i, re.IGNORECASE):
+                prefix_matches.add(j)
+            if re.match(r".*" + c_suffix + "$", i, re.IGNORECASE):
+                suffix_matches.add(j)
+
+        final_matches = set([])
+
+        if len(prefix_matches) > 0:
+            final_matches = prefix_matches
+
+        if len(suffix_matches) > 0 and (len(prefix_matches) == 0 or
+                                        len(suffix_matches) < len(prefix_matches)):
+            final_matches = suffix_matches
+
+        if len(prefix_matches) == len(suffix_matches) and len(prefix_matches) > 0:
+            final_matches = set(prefix_matches).update(suffix_matches)
+
+        tmp = ':'.join(list(final_matches))
+        print("   pref:", prefix_matches, " suf:", suffix_matches, " final:", tmp)
+
+        if len(final_matches) > 1:
+            tmp = "__PLEASE_SELECT_ONLY_ONE_CONTROL__:" + tmp
+        elif len(final_matches) == 0:
+            print("No control sample found!")
+
+        chip_dict_pred["chip_dict"][i] = {}
+        chip_dict_pred["chip_dict"][i]['control'] = tmp
+        if re.match(".*(H3K4me1|H3K36me3|H3K9me3|H3K27me3).*", i, re.IGNORECASE):
+            chip_dict_pred["chip_dict"][i]['broad'] = True
+        else:
+            chip_dict_pred["chip_dict"][i]['broad'] = False
 
     write_configfile(os.path.join(wdir, "chip_seq_sample_config.yaml"), chip_dict_pred)
     print("---------------------------------------------------------------------------------------")

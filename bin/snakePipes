@@ -40,6 +40,9 @@ def parse_arguments():
                           'created conda environments. This will ignore what is already '
                           'in the workflow-specific yaml files and where conda is installed.')
 
+    createEnvsParser.add_argument('--only',
+                                  nargs='+',
+                                  help="If specified, a space-separated list of environments to create. This should typically only be done for testing purposes. The possible environments are: {}".format(cof.set_env_yamls().keys()))
     createEnvsParser.add_argument('--force',
                                   action='store_true',
                                   help='Force creation of conda environments, even if they apparently exist.')
@@ -52,9 +55,9 @@ def parse_arguments():
                                   action='store_true',
                                   help='Skip registering GATK')
 
-    createEnvsParser.add_argument('--develop',
+    createEnvsParser.add_argument('--noSitePackages',
                                   action='store_true',
-                                  help='Developer mode, this prevents disabling site-packages in the root conda environment')
+                                  help='Prevent conda from looking at anything installed in a users home directory. While this is convenient to ensure that ONLY packages installed by snakePipes are used, it means that you will occasionally get scary-looking warning messages when you try to create new conda environments.')
 
     return parser
 
@@ -139,23 +142,6 @@ def fixSitePy(envPath):
         subprocess.check_call(cmd)
 
 
-def fixSnakemake(envPath):
-    """
-    Fix issue #916 in snakemake. This should eventually be removed before a real release.
-    """
-    for fname in glob.glob('{}/lib/python*/site-packages/snakemake/script.py'.format(envPath)):
-        f = open(fname).read()
-        lines = f.split('\n')
-        if 'path.startswith' in lines[237]:
-            lines[237] = '            if False:'
-            f = open(fname, "w")
-            f.write("\n".join(lines))
-            f.close()
-
-            cmd = [os.path.join(envPath, "bin", "python"), '-m', 'compileall', fname]
-            subprocess.check_call(cmd)
-
-
 def createCondaEnvs(args):
     """
     Create all of the conda environments
@@ -195,7 +181,9 @@ def createCondaEnvs(args):
     # rewrite defaults.yaml
     cof.write_configfile(os.path.join(baseDir, "shared/defaults.yaml"), cf)
 
-    for env in cof.set_env_yamls().values():
+    for envName, env in cof.set_env_yamls().items():
+        if args.only is not None and envName not in args.only:
+            continue
         # Hash the file ala snakemake
         md5hash = hashlib.md5()
         md5hash.update(condaDirUse.encode())
@@ -221,7 +209,7 @@ def createCondaEnvs(args):
                 subprocess.check_call(cmd)
 
         # Ignore site-packages
-        if not args.develop:
+        if args.noSitePackages:
             fixSitePy(os.path.join(condaDirUse, h))
 
     # We can't actually install GATK with conda, which is annoying
@@ -229,9 +217,8 @@ def createCondaEnvs(args):
         registerGATK(gatkEnv)
 
     # Ignore site-packages in this env
-    if not args.develop:
+    if args.noSitePackages:
         fixSitePy(rootDir)
-    fixSnakemake(rootDir)
 
 
 def main(args):
