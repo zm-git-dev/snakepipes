@@ -10,7 +10,7 @@ def multiqc_input_check(return_value):
             if trim:
                 infiles.append( expand("FastQC_trimmed/{sample}{read}_fastqc.html", sample = samples, read = reads) )
                 indir += " FastQC_trimmed "
-                infiles.append( expand(fastq_dir+"/{sample}{read}.fastq.gz", sample = samples, read = reads) )
+                infiles.append( expand(fastq_dir+"/{sample}{read}{ext}", sample = samples, read = reads, ext = ext) )
                 indir += fastq_dir + " "
             elif fastqc:
                 infiles.append( expand("FastQC/{sample}{read}_fastqc.html", sample = samples, read = reads) )
@@ -19,7 +19,7 @@ def multiqc_input_check(return_value):
             if trim:
                 infiles.append( expand("FastQC_trimmed/{sample}_fastqc.html", sample = samples) )
                 indir += " FastQC_trimmed "
-                infiles.append( expand(fastq_dir+"/{sample}.fastq.gz", sample = samples) )
+                infiles.append( expand(fastq_dir+"/{sample}{ext}", sample = samples, ext = ext) )
                 indir += fastq_dir + " "
             elif fastqc:
                 infiles.append( expand("FastQC/{sample}_fastqc.html", sample = samples) )
@@ -65,7 +65,7 @@ def multiqc_input_check(return_value):
             indir += " FastQC_trimmed "
             infiles.append( expand("FastQC/{sample}{read}_fastqc.html", sample = samples, read = reads) )
             indir +=" FastQC "
-            infiles.append( expand(fastq_dir+"/{sample}.fastq.gz", sample = samples, read = reads) )
+            infiles.append( expand(fastq_dir+"/{sample}{ext}", sample = samples, read = reads, ext = ext) )
             indir += fastq_dir + " "
         elif fastqc:
              infiles.append( expand("FastQC/{sample}{read}_fastqc.html", sample = samples, read = reads) )

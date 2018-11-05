@@ -86,10 +86,10 @@ def run_FastQC(fastqc):
 
 def run_Trimming(trim, fastqc):
     if trim and fastqc:
-        return( expand(fastq_dir+"/{sample}{read}.fastq.gz", sample = samples, read = reads) +
+        return( expand(fastq_dir+"/{sample}{read}{ext}", sample = samples, read = reads, ext = ext) +
                 expand("FastQC_trimmed/{sample}{read}_fastqc.html", sample = samples, read = reads) )
     elif trim:
-        return( expand(fastq_dir+"/{sample}{read}.fastq.gz", sample = samples, read = reads) )
+        return( expand(fastq_dir+"/{sample}{read}{ext}", sample = samples, read = reads, ext = ext) )
     else:
         return([])
 
@@ -191,7 +191,7 @@ localrules: FASTQ
 
 rule all:
     input:
-        expand("FASTQ/{sample}{read}.fastq.gz", sample = samples, read = reads),
+        expand("FASTQ/{sample}{read}{ext}", sample = samples, read = reads, ext = ext),
         run_FastQC(fastqc),
         run_Trimming(trim, fastqc),
         expand(mapping_prg+"/{sample}.bam", sample = samples),
