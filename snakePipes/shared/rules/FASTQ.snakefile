@@ -35,8 +35,8 @@ if downsample:
 else:
     rule FASTQ:
         input:
-            indir+"/{sample}{read}{ext}"
+            indir+"/{sample}{read}.fastq.gz"
         output:
-            "FASTQ/{sample}{read}{ext}"
+            "FASTQ/{sample}{read}.fastq.gz"
         shell:
             "( [ -f {output} ] || ln -s -r {input} {output} ) && touch -h {output}"
