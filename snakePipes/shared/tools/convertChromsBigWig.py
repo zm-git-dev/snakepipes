@@ -10,12 +10,12 @@ import itertools
 
 
 def parse_arguments(defaults):
-    parser = argparse.ArgumentParser(description='Convert chromosome names for bigwig files between ensembl, gencode and UCSC naming schemes\n' +
-                                     "Per default it writes to the same location as original file, however with a modified filename:\n" +
-                                     "eg. test.bw --> test.[toFormat]_chroms.bw\n" +
-                                     "Change this with the -o option!\n\n" +
-                                     "Mapping tables are taken from https://github.com/dpryan79/ChromosomeMappings\n\n" +
-                                     "Provided mapping options need to exactly match an existing file\n" +
+    parser = argparse.ArgumentParser(description="Convert chromosome names for bigwig files between ensembl, gencode and UCSC naming schemes\n"
+                                     "Per default it writes to the same location as original file, however with a modified filename:\n"
+                                     "eg. test.bw --> test.[toFormat]_chroms.bw\n"
+                                     "Change this with the -o option!\n\n"
+                                     "Mapping tables are taken from https://github.com/dpryan79/ChromosomeMappings\n\n"
+                                     "Provided mapping options need to exactly match an existing file\n"
                                      "[GENOME]_[FROM_FORMAT]2[TO_FORMAT].txt in this repo!",
                                      usage='$ convertChroms BIGWIG', formatter_class=RawTextHelpFormatter)
 
