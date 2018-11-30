@@ -26,10 +26,10 @@ def parse_arguments(defaults):
     parser.add_argument('--genome', '-g',
                         action='store',
                         dest='genome',
-                        help='Genome version of original bigwig \n' +
-                        '(GRCm37|GRCm38|GRCh37|GRCh38|BDGP6|dm3|GRCz10|GRCz11|\n' +
-                        'JGI_4.2|MEDAKA1|R64-1-1|WBcel235|Zv9|galGal4|rn5|rn6)\n' +
-                        '(default: %(default)s)',
+                        help="Genome version of original bigwig \n"
+                        "(GRCm37|GRCm38|GRCh37|GRCh38|BDGP6|dm3|GRCz10|GRCz11|\n"
+                        "JGI_4.2|MEDAKA1|R64-1-1|WBcel235|Zv9|galGal4|rn5|rn6)\n"
+                        "(default: %(default)s)",
                         default=defaults["genome"])
 
     parser.add_argument('--fromFormat', '-f',
