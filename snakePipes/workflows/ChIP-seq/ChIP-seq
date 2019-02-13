@@ -78,7 +78,7 @@ def parse_args(defaults={"verbose": False, "configfile": None, "cluster_configfi
                                "while large window sizes (~500 bp) should be used for broad marks (eg. H3K27me3) "
                                "(default: '%(default)s')",
                           default=defaults["window_size"])
-    
+
     optional.add_argument("--UCSCtracks",
                           dest="UCSCTracksGenome",
                           help="Produce also UCSC conform bigwig tracks. Please provide the genome assembly corresponding to your selected genome config file! (eg. GRCh37, GRCm38, BDGP6)"
