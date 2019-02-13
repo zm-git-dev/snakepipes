@@ -19,15 +19,15 @@ if paired:
         threads: 8
         conda: CONDA_SHARED_ENV
         shell: """
-            cutadapt {params.opts} -j {threads} -e 0.1 -q 16 -O 3 --trim-n --minimum-length 25 -a AGATCGGAAGAGC -A AGATCGGAAGAGC \
+            cutadapt -j {threads} -e 0.1 -q 16 -O 3 --trim-n --minimum-length 25 -a AGATCGGAAGAGC -A AGATCGGAAGAGC {params.opts} \
                 -o {output.r1} -p {output.r2} {input.r1} {input.r2} > {log.out} 2> {log.err}
             """
 else:
     rule cutadapt:
         input:
-            r1 = fastq_indir_trim+"/{sample}.fastq.gz",
+            r1 = fastq_indir_trim+"/{sample}"+reads[0]+".fastq.gz",
         output:
-            "FASTQ_Cutadapt/{sample}.fastq.gz",
+            "FASTQ_Cutadapt/{sample}"+reads[0]+".fastq.gz",
         params:
             opts = str(trim_options or '')
         log:
@@ -38,7 +38,7 @@ else:
         threads: 8
         conda: CONDA_SHARED_ENV
         shell: """
-            cutadapt {params.opts} -j {threads} -e 0.1 -q 16 -O 3 --trim-n --minimum-length 25 -a AGATCGGAAGAGC \
+            cutadapt -j {threads} -e 0.1 -q 16 -O 3 --trim-n --minimum-length 25 -a AGATCGGAAGAGC {params.opts} \
                 -o {output} {input.r1} > {log.out} 2> {log.err}
             """
 
@@ -71,9 +71,9 @@ if paired:
 else:
     rule TrimGalore:
         input:
-            fastq_indir_trim+"/{sample}.fastq.gz"
+            fastq_indir_trim+"/{sample}"+reads[0]+".fastq.gz"
         output:
-            "FASTQ_TrimGalore/{sample}.fastq.gz"
+            "FASTQ_TrimGalore/{sample}"+reads[0]+".fastq.gz"
         params:
             tmp = "FASTQ_TrimGalore/{sample}_trimmed.fq.gz",
             opts = str(trim_options or '')
@@ -91,16 +91,31 @@ else:
 
 ### FastQC_on_trimmed #######################################################
 
-rule FastQC_on_trimmed:
-    input:
-        fastq_dir+"/{sample}{read}.fastq.gz"
-    output:
-        "FastQC_trimmed/{sample}{read}_fastqc.html"
-    log:
-        out = "FastQC_trimmed/logs/FastQC_trimmed.{sample}{read}.out",
-        err = "FastQC_trimmed/logs/FastQC_trimmed.{sample}{read}.err"
-    benchmark:
-        "FastQC_trimmed/.benchmark/FastQC_trimmed.{sample}{read}.benchmark"
-    threads: 2
-    conda: CONDA_SHARED_ENV
-    shell: "fastqc -o FastQC_trimmed {input} > {log.out} 2> {log.err}"
+if paired:
+    rule FastQC_on_trimmed:
+        input:
+            fastq_dir+"/{sample}{read}.fastq.gz"
+        output:
+            "FastQC_trimmed/{sample}{read}_fastqc.html"
+        log:
+            out = "FastQC_trimmed/logs/FastQC_trimmed.{sample}{read}.out",
+            err = "FastQC_trimmed/logs/FastQC_trimmed.{sample}{read}.err"
+        benchmark:
+            "FastQC_trimmed/.benchmark/FastQC_trimmed.{sample}{read}.benchmark"
+        threads: 2
+        conda: CONDA_SHARED_ENV
+        shell: "fastqc -o FastQC_trimmed {input} > {log.out} 2> {log.err}"
+else:
+    rule FastQC_on_trimmed_SE:
+        input:
+            fastq_dir+"/{sample}"+reads[0]+".fastq.gz"
+        output:
+            "FastQC_trimmed/{sample}"+reads[0]+"_fastqc.html"
+        log:
+            out = "FastQC_trimmed/logs/FastQC_trimmed.{sample}"+reads[0]+".out",
+            err = "FastQC_trimmed/logs/FastQC_trimmed.{sample}"+reads[0]+".err"
+        benchmark:
+            "FastQC_trimmed/.benchmark/FastQC_trimmed.{sample}"+reads[0]+".benchmark"
+        threads: 2
+        conda: CONDA_SHARED_ENV
+        shell: "fastqc -o FastQC_trimmed {input} > {log.out} 2> {log.err}"  

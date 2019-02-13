@@ -1,3 +1,22 @@
+rule bamCoverage_unique_mappings:
+    input:
+        bam = mapping_prg+"/{sample}.bam",
+        bai = mapping_prg+"/{sample}.bam.bai"
+    output:
+        bw_fwd = "bamCoverage/{sample}.uniqueMappings.fwd.bw",
+        bw_rev = "bamCoverage/{sample}.uniqueMappings.rev.bw",
+    conda:
+        CONDA_SHARED_ENV
+    params:
+        bw_binsize = bw_binsize
+    log:
+        out="bamCoverage/logs/bamCoverage_uniqueMappings.{sample}.out",
+        err="bamCoverage/logs/bamCoverage_uniqueMappings.{sample}.err"
+    benchmark:
+        "bamCoverage/.benchmark/bamCoverage_uniqueMappings.{sample}.benchmark"
+    threads: 8
+    shell: bamcov_unique_cmd
+
 
 rule bamCoverage_RPKM:
     input:
@@ -41,8 +60,7 @@ rule plotEnrichment:
     input:
         bam = expand(mapping_prg+"/{sample}.bam", sample=samples),
         bai = expand(mapping_prg+"/{sample}.bam.bai", sample=samples),
-        gtf = "Annotation/genes.filtered.gtf",
-        gtf2= "Annotation/genes.filtered.transcripts.gtf"
+        gtf = "Annotation/genes.filtered.gtf"
     output:
         "deepTools_qc/plotEnrichment/plotEnrichment.tsv",
     conda:

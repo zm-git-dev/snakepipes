@@ -16,7 +16,8 @@ import snakePipes.parserCommon as parserCommon
 
 
 def parse_args(defaults={"verbose": False, "configfile": None, "cluster_configfile": None, "max_jobs": 5, "snakemake_options": "--use-conda", "tempdir": None,
-                         "paired": True, "bw_binsize": 25, "sample_info": "", "window_size": 150, "predict_chip_dict": False}):
+                         "paired": True, "bamPE": False, "bw_binsize": 25, "sampleSheet": "", "window_size": 150, "predict_chip_dict": None, "bigWigType": "both",
+                         "fromBam": "", "bam_ext": ".bam"}):
     """
     Parse arguments from the command line.
     """
@@ -38,8 +39,19 @@ def parse_args(defaults={"verbose": False, "configfile": None, "cluster_configfi
     optional.add_argument("--single-end",
                           dest="paired",
                           action="store_false",
-                          help="input data is single-end, not paired-end",
+                          help="Input data is single-end, not paired-end",
                           default=defaults["paired"])
+
+    optional.add_argument("--BAMPE",
+                          dest="bamPE",
+                          action="store_true",
+                          help="Use the BAMPE mode of macs2, on top of the BAM mode. The BAMPE mode would use the fragment sizes present in BAM file, and output the files under 'macs2' folder with an extention 'BAMPE_peaks.xls'. The default macs2 rule under snakePipes uses the fragment sizes estimated from deepTools, and produces files with an extention 'BAM_peaks.xls'. (default: '%(default)s')",
+                          default=defaults["bamPE"])
+
+    optional.add_argument("--bigWigType",
+                          dest="bigWigType",
+                          help="Type of bigWig file to create. Options are: 'subtract' (control-subtracted ChIP coverage), 'log2ratio' (for log2 ratio of ChIP over control) or 'both' (create both set of bed files). Note that the allele-specific mode currently only produces 'log2ratio' bigwigs. (default: '%(default)s')",
+                          default=defaults["bigWigType"])
 
     optional.add_argument("--bw-binsize",
                           dest="bw_binsize",
@@ -48,15 +60,15 @@ def parse_args(defaults={"verbose": False, "configfile": None, "cluster_configfi
                           type=int,
                           default=defaults["bw_binsize"])
 
-    optional.add_argument("--DB",
-                          dest="sample_info",
+    optional.add_argument("--sampleSheet",
+                          dest="sampleSheet",
                           help="Information on samples (If differential binding analysis required); see "
-                               "'snakepipes/shared/sampleInfo.example.tsv' for example. "
+                               "'docs/content/sampleSheet.example.tsv' for example. "
                                "IMPORTANT: The first entry defines which group of samples are control. "
                                "By this, the order of comparison and likewise the sign of values can be changed! "
                                "Also, the condition `control` should only be used for input samples (control peaks "
                                "are not evaluated for differential binding) (default: '%(default)s')",
-                          default=defaults["sample_info"])
+                          default=defaults["sampleSheet"])
 
     optional.add_argument("--DB_windowSize",
                           dest="window_size",
@@ -67,17 +79,38 @@ def parse_args(defaults={"verbose": False, "configfile": None, "cluster_configfi
                                "(default: '%(default)s')",
                           default=defaults["window_size"])
     
-    optional.add_argument("--predict_chip_dict",
-                          dest="predict_chip_dict",
-                          action="store_true",
-                          help="Use existing bam files to predict a chip-seq sample configuration file. Write it to the workingdir")
-    
     optional.add_argument("--UCSCtracks",
                           dest="UCSCTracksGenome",
                           help="Produce also UCSC conform bigwig tracks. Please provide the genome assembly corresponding to your selected genome config file! (eg. GRCh37, GRCm38, BDGP6)"
                           " (default: '%(default)s')",
                           default=defaults["UCSCTracksGenome"])
+    
+    optional.add_argument("--predict_chip_dict",
+                          dest="predict_chip_dict",
+                          nargs='?',
+                          action='store',
+                          help="Use existing bam files to predict a chip-seq sample configuration file. Write it to the workingdir. "
+                               "If no value is given, samples that contain 'input' are used as ChIP input/ctrl. Provide a custom pattern like 'input,H3$,H4$' to change that!",
+                          default= None,
+                          const="input")
+    optional.add_argument("--fromBam",
+                         dest="fromBam",
+                         help=argparse.SUPPRESS,
+                         default=defaults["fromBam"])
+    optional.add_argument("--fromBamExt",
+                         dest="bam_ext",
+                         help=argparse.SUPPRESS,
+                         default=defaults["bam_ext"])
+    optional.add_argument("--plotFormat",
+                         dest="plot_format",
+                         choices=['png', 'pdf', 'None'],
+                         metavar="STR",
+                         type=str,
+                         help="Format of the output plots from deepTools. Select 'none' for no plots (default: '%(default)s')",
+                         default=defaults["plot_format"])
 
+    #parserCommon.commonOptions(optional, defaults,fromBam=True)
+    
     return parser
 
 
@@ -87,6 +120,7 @@ def main():
     # get command line arguments
     parser = parse_args(defaults)
     args = parser.parse_args()
+    args, defaults = cf.handleUserArgs(args, defaults, parse_args)
 
     # we also add these paths to config, although we don't use them in the Snakefile
     args.baseDir = baseDir
@@ -95,8 +129,9 @@ def main():
     cf.checkCommonArguments(args, baseDir)
 
     # Local argument checks
-    if args.predict_chip_dict:
-        cf.predict_chip_dict(args.workingdir)
+    if args.predict_chip_dict is not None:
+        cf.predict_chip_dict(args.workingdir,args.predict_chip_dict,args.bam_ext,args.fromBam)
+        sys.exit(0)
 
     if args.samples_config is not None and os.path.exists(os.path.abspath(args.samples_config)):
         args.samples_config = os.path.abspath(args.samples_config)

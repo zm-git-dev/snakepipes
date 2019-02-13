@@ -9,6 +9,7 @@ import yaml
 import glob
 import sys
 import shutil
+from fuzzywuzzy import fuzz
 
 
 def set_env_yamls():
@@ -23,9 +24,9 @@ def set_env_yamls():
             'CONDA_CHIPSEQ_ENV': 'envs/chip_seq.yaml',
             'CONDA_ATAC_ENV': 'envs/atac_seq.yaml',
             'CONDA_HIC_ENV': 'envs/hic.yaml',
-            'CondaEnvironment': 'envs/wgbs.yaml',
-            'mCtCondaEnvironment': 'envs/methylCtools.yaml',
-            'RmdCondaEnvironment': 'envs/rmarkdown.yaml'}
+            'CONDA_WGBS_ENV': 'envs/wgbs.yaml',
+            'CONDA_PY27_ENV': 'envs/python27.yaml',
+            'CONDA_RMD_ENV': 'envs/rmarkdown.yaml'}
 
 
 def merge_dicts(x, y):
@@ -129,9 +130,7 @@ def is_paired(infiles, ext, reads):
         fname = os.path.basename(infile).replace(ext, "")
         m = re.match("^(.+)(" + reads[0] + "|" + reads[1] + ")$", fname)
         if m:
-            # print(m.group())
             bname = m.group(1)
-            # print(bname)
             if bname not in infiles_dic:
                 infiles_dic[bname] = [infile]
             else:
@@ -142,28 +141,43 @@ def is_paired(infiles, ext, reads):
     return paired
 
 
-def get_fragment_length(infile, sampleName):
+def check_replicates(sample_info_file):
     """
-    Return median insert size from a metrics file created by
-    deeptools bamPEFragmentSize.
-    Read the 37 column text file, grep the row corresponding to the sample and
-    return the entry from 6th column (Frag. Len. Median)
+    return True if each condition has at least 2 replicates
+    this check is eg. necessary for sleuth
     """
-    with open(infile, "r") as f:
-        for line in f:
-            line = line.strip()
-            if line.startswith("filtered_bam/{}".format(sampleName)):
-                try:
-                    median = line.split()[5]
-                    return int(float(median))
-                except TypeError:
-                    print("ERROR: File", infile, "is NOT an output from bamPEFragmentSize.\n")
-                    exit(1)
-            else:
-                pass
-    # no match in infile
-    print("ERROR: File", infile, "is NOT an output from bamPEFragmentSize.\n")
-    exit(1)
+    ret = subprocess.check_output(
+        "cat " + sample_info_file + "| awk '/^[[:space:]]$/{next;}{if (NR==1){ col=0; for (i=1;i<=NF;i++) if ($i~\"condition\") col=i}; if (NR>1) print $col}' | sort | uniq -c | awk '{if ($1>1) ok++}END{if (NR>1 && ok>=NR) print \"REPLICATES_OK\"}'",
+        shell=True).decode()
+
+    if ret.find("REPLICATES_OK") >= 0:
+        return True
+    else:
+        return False
+
+
+# def get_fragment_length(infile, sampleName):
+#     """
+#     Return median insert size from a metrics file created by
+#     deeptools bamPEFragmentSize.
+#     Read the 37 column text file, grep the row corresponding to the sample and
+#     return the entry from 6th column (Frag. Len. Median)
+#     """
+#     with open(infile, "r") as f:
+#         for line in f:
+#             line = line.strip()
+#             if line.startswith("filtered_bam/{}".format(sampleName)):
+#                 try:
+#                     median = line.split()[5]
+#                     return int(float(median))
+#                 except TypeError:
+#                     print("ERROR: File", infile, "is NOT an output from bamPEFragmentSize.\n")
+#                     exit(1)
+#             else:
+#                 pass
+#     # no match in infile
+#     print("ERROR: File", infile, "is NOT an output from bamPEFragmentSize.\n")
+#     exit(1)
 
 
 def make_temp_dir(tempdir, fallback_dir, verbose=False):
@@ -195,7 +209,7 @@ def checkAlleleParams(args):
             # if no SNPfile, check for a VCF file
             if os.path.exists(args.VCFfile):
                 # check for strain ID
-                if args.strains is '':
+                if args.strains == '':
                     print("\nError! Please specify strain ID to extract from given VCF file for Allele-specific mapping! ({})\n".format(args.VCFfile))
                     exit(1)
                 else:
@@ -228,17 +242,19 @@ def cleanLogs(d):
             os.remove(f)
 
 
-def check_sample_info_header(sample_info_file):
+def check_sample_info_header(sampleSheet_file):
     """
     return True in case sample info file contains column names 'name' and 'condition'
     """
-    ret = subprocess.check_output("cat " + sample_info_file + " | head -n1",
-                                  shell=True).decode()
-
-    if "name" in ret.split() and "condition" in ret.split():
-        return True
+    if not os.path.isfile(sampleSheet_file):
+        sys.exit("ERROR: Cannot find sample info file! (--sampleSheet {})\n".format(sampleSheet_file))
+    sampleSheet_file = os.path.abspath(sampleSheet_file)
+    ret = open(sampleSheet_file).read().split("\n")[0].split()
+    if "name" in ret and "condition" in ret:
+        print("Sample sheet found and format is ok!\n")
     else:
-        return False
+        sys.exit("ERROR: Please use 'name' and 'condition' as column headers in sample info file! ({})\n".format(sampleSheet_file))
+    return sampleSheet_file
 
 
 def setDefaults(fileName):
@@ -254,6 +270,52 @@ def setDefaults(fileName):
     globalDefaults = load_configfile(os.path.join(baseDir, "shared/defaults.yaml"), False)
     defaults = merge_dicts(defaults, globalDefaults)
     return baseDir, workflowDir, defaults
+
+
+def handleUserArgs(args, defaults, args_func):
+    """
+    If a user supplies a custom YAML file then that must then replace the defaults.
+    However command line options need to take precedence, so update defaults and
+    simply reparse the command line options (with args_func().parse_args())
+    """
+    if args.configfile:
+        if not os.path.exists(args.configfile):
+            sys.exit("\nError! Provided configfile (-c) not found! ({})\n".format(args.configfile))
+        user_config = load_configfile(args.configfile, False)
+        defaults = merge_dicts(defaults, user_config)
+        parser = args_func(defaults)
+        args = parser.parse_args()
+    defaults.update(vars(args))
+    return args, defaults
+
+
+def sendEmail(args, returnCode):
+    """
+    Try to send an email to the user. Errors must be non-fatal.
+    """
+    try:
+        import smtplib
+        from email.message import EmailMessage
+        msg = EmailMessage()
+        msg['Subject'] = "Snakepipes completed"
+        msg['From'] = args.emailSender
+        msg['To'] = args.emailAddress
+        if returnCode == 0:
+            msg.set_content("The pipeline finished successfully\n")
+        else:
+            msg.set_content("The pipeline failed with exit code {}\n".format(returnCode))
+
+        if args.onlySSL:
+            s = smtplib.SMTP_SSL(args.smtpServer, port=args.smtpPort)
+        else:
+            s = smtplib.SMTP(args.smtpServer, port=args.smtpPort)
+        if args.smtpUsername:
+            s.login(args.smtpUsername, args.smtpPassword)
+        s.send_message(msg)
+        s.quit()
+    except:
+        sys.stderr.write("An error occured while sending the email.\n")
+        pass
 
 
 def checkCommonArguments(args, baseDir, outDir=False, createIndices=False):
@@ -277,27 +339,34 @@ def checkCommonArguments(args, baseDir, outDir=False, createIndices=False):
             else:
                 sys.exit("\nError! Input dir not found! ({})\n".format(args.indir))
         else:
-            if os.path.exists(args.workingdir):
-                args.workingdir = os.path.abspath(args.workingdir)
+            if args.fromBam:
+                if os.path.exists(args.fromBam):
+                    os.makedirs(args.workingdir, exist_ok=True)
+                    args.workingdir = os.path.abspath(args.workingdir)
+                    args.fromBam = os.path.abspath(args.fromBam)
+                else:
+                    sys.exit("\nError! Directory with bam files (--fromBam) not found! ({})\n".format(args.fromBam))
             else:
-                sys.exit("\nError! Working-dir (-d) dir not found! ({})\n".format(args.workingdir))
+                if os.path.exists(args.workingdir):
+                    args.workingdir = os.path.abspath(args.workingdir)
+                else:
+                    sys.exit("\nError! Working-dir (-d) dir not found! ({})\n".format(args.workingdir))
             args.outdir = args.workingdir
     args.cluster_logs_dir = os.path.join(args.outdir, "cluster_logs")
-    # 2. Config file
-    if args.configfile and not os.path.exists(args.configfile):
-        sys.exit("\nError! Provided configfile (-c) not found! ({})\n".format(args.configfile))
-    # 3. Sample info file
-    if 'sample_info' in args and args.sample_info:
-        if os.path.exists(os.path.abspath(args.sample_info)):
-            args.sample_info = os.path.abspath(args.sample_info)
-        else:
-            sys.exit("\nSample info file not found! (--DB {})\n".format(args.sample_info))
-        if not check_sample_info_header(args.sample_info):
-            sys.exit("ERROR: Please use 'name' and 'condition' as column headers in sample info file! ({})\n".format(args.sample_info))
-    # 4. get abspath from user provided genome/organism file
+    # 2. Sample info file
+    if 'sampleSheet' in args and args.sampleSheet:
+        args.sampleSheet = check_sample_info_header(args.sampleSheet)
+    # 3. get abspath from user provided genome/organism file
     if not createIndices:
         if not os.path.isfile(os.path.join(baseDir, "shared/organisms/{}.yaml".format(args.genome))) and os.path.isfile(args.genome):
             args.genome = os.path.abspath(args.genome)
+
+    if args.emailAddress:
+        # Must have at least an email server specified
+        if args.smtpServer == "" or not args.smtpServer:
+            sys.exit("Sorry, there is no SMTP server specified in defaults.yaml. Please specify one with --smtpServer")
+        if args.emailSender == "" or not args.emailSender:
+            sys.exit("Sorry, there is no email sender specified in defaults.yaml. Please specify one with --emailSender")
 
 
 def commonYAMLandLogs(baseDir, workflowDir, defaults, args, callingScript):
@@ -308,18 +377,12 @@ def commonYAMLandLogs(baseDir, workflowDir, defaults, args, callingScript):
     workflowName = os.path.basename(callingScript)
     snakemake_path = os.path.dirname(os.path.abspath(callingScript))
 
-    # merge configuration dicts
-    config = defaults   # 1) form defaults.yaml
-    if args.configfile:
-        user_config = load_configfile(args.configfile, False)
-        config = merge_dicts(config, user_config)  # 2) from user_config.yaml
-    config_wrap = config_diff(vars(args), defaults)  # 3) from wrapper parameters
-    config = merge_dicts(config, config_wrap)
-
     # Ensure the log directory exists
     os.makedirs(args.cluster_logs_dir, exist_ok=True)
 
     # save to configs.yaml in outdir
+    config = defaults
+    config.update(vars(args))  # This allows modifications of args after handling a user config file to still make it to the YAML given to snakemake!
     write_configfile(os.path.join(args.outdir, '{}.config.yaml'.format(workflowName)), config)
 
     # merge cluster config files: 1) global one, 2) workflow specific one, 3) user provided one
@@ -330,6 +393,14 @@ def commonYAMLandLogs(baseDir, workflowDir, defaults, args, callingScript):
         user_cluster_config = load_configfile(args.cluster_configfile, False)
         cluster_config = merge_dicts(cluster_config, user_cluster_config)  # merge/override variables from user_config.yaml
     write_configfile(os.path.join(args.outdir, '{}.cluster_config.yaml'.format(workflowName)), cluster_config)
+
+    # Save the organism YAML file as {PIPELINE}_organism.yaml
+    orgyaml = os.path.join(baseDir, "shared/organisms/{}.yaml".format(args.genome))
+    if not os.path.isfile(orgyaml):
+        orgyaml = args.genome
+    organismYAMLname = os.path.join(args.outdir, "{}_organism.yaml".format(workflowName))
+    if workflowName != "createIndices" and os.path.abspath(organismYAMLname) != os.path.abspath(orgyaml):
+        shutil.copyfile(orgyaml, organismYAMLname)
 
     if args.notemp:
         args.snakemake_options += " --notemp"
@@ -425,6 +496,8 @@ def runAndCleanup(args, cmd, logfile_name, temp_path):
     # Exit with an error if snakemake encountered an error
     if p.returncode != 0:
         sys.stderr.write("Error: snakemake returned an error code of {}, so processing is incomplete!\n".format(p.returncode))
+        if args.emailAddress:
+            sendEmail(args, p.returncode)
         sys.exit(p.returncode)
 
     # remove temp dir
@@ -433,18 +506,29 @@ def runAndCleanup(args, cmd, logfile_name, temp_path):
         if args.verbose:
             print("Temp directory removed ({})!\n".format(temp_path))
 
+    # Send email if desired
+    if args.emailAddress:
+        sendEmail(args, 0)
 
-def predict_chip_dict(wdir):
+
+def predict_chip_dict(wdir, input_pattern_str, bamExt, fromBam=None):
     """
-    Predict a chip_dict from bam files under filtered_bam/ from DNA-mapping workflow
-    ChIP input/control samples are identified from pattern 'input' (case ignored)
-    chip_dict is written as yaml to current workflow workingdir
+    Predict a chip_dict from set of bam files
+    ChIP input/control samples are identified from input_pattern (default: 'input')
+    for each sample then the best input sample (by fuzzywuzzy score) is selected
+    chip_dict is written as yaml to workflow workingdir
     predicts whether a sample is broad or narrow based on histone mark pattern
     """
-    pat1 = re.compile(r"input.*$", re.IGNORECASE)
-    pat2 = re.compile(r"^.*input", re.IGNORECASE)
-    infiles = sorted(glob.glob(os.path.join(wdir, 'filtered_bam/', '*.bam')))
-    samples = get_sample_names(infiles, ".filtered.bam", ['', ''])
+    pat = "|".join(re.split(',| |\\||;', input_pattern_str))
+    input_pat = r".*(" + pat + ")"
+    clean_pat = r"" + pat + ""
+    pat1 = re.compile(clean_pat, re.IGNORECASE)
+
+    if fromBam:
+        infiles = sorted(glob.glob(os.path.join(fromBam, '*' + bamExt)))
+    else:
+        infiles = sorted(glob.glob(os.path.join(wdir, 'filtered_bam/', '*.bam')))
+    samples = get_sample_names_bam(infiles, bamExt)
 
     chip_dict_pred = {}
     chip_dict_pred["chip_dict"] = {}
@@ -455,43 +539,32 @@ def predict_chip_dict(wdir):
 
     input_samples = set([])
     for i in samples:
-        if re.match(r".*input.*", i, re.IGNORECASE):
+        if re.match(input_pat, i, re.IGNORECASE):
             print("...found: ", i)
             input_samples.add(i)
 
     print("\nTry to find corresponding ChIP samples...")
-    final_matches = set()
+
     for i in samples:
         if i in input_samples:
             continue
 
-        print("\n sample: ", i)
-
-        prefix_matches = set([])
-        suffix_matches = set([])
-
+        print("\n sample: ", i,)
+        matches_sim = {}
         for j in input_samples:
-            c_prefix = pat1.sub("", j)
-            c_suffix = pat2.sub("", j)
+            c_clean = pat1.sub("", j)
+            sim1 = fuzz.ratio(c_clean, i) + fuzz.partial_ratio(c_clean, i) + fuzz.token_sort_ratio(c_clean, i) + fuzz.token_set_ratio(c_clean, i)
+            matches_sim[j] = sim1 / 4
 
-            if re.match(r"^" + c_prefix + ".*", i, re.IGNORECASE):
-                prefix_matches.add(j)
-            if re.match(r".*" + c_suffix + "$", i, re.IGNORECASE):
-                suffix_matches.add(j)
-
+        sim = 0
         final_matches = set([])
-
-        if len(prefix_matches) > 0:
-            final_matches = prefix_matches
-
-        if len(suffix_matches) > 0 and (len(prefix_matches) == 0 or len(suffix_matches) < len(prefix_matches)):
-            final_matches = suffix_matches
-
-        if len(prefix_matches) == len(suffix_matches) and len(prefix_matches) > 0:
-            final_matches = set(prefix_matches).update(suffix_matches)
+        for key, value in sorted(matches_sim.items(), key=lambda k: (k[1], k[0]), reverse=True):
+            if value >= sim:
+                final_matches.add(key)
+                print("   top matching input sample by score: %s = %s" % (key, value))
+                sim = value
 
         tmp = ':'.join(list(final_matches))
-        print("   pref:", prefix_matches, " suf:", suffix_matches, " final:", tmp)
 
         if len(final_matches) > 1:
             tmp = "__PLEASE_SELECT_ONLY_ONE_CONTROL__:" + tmp
@@ -505,9 +578,9 @@ def predict_chip_dict(wdir):
         else:
             chip_dict_pred["chip_dict"][i]['broad'] = False
 
-    write_configfile(os.path.join(wdir, "chip_seq_sample_config.yaml"), chip_dict_pred)
+    outfile = os.path.join(wdir, "chip_seq_sample_config.PREDICTED.yaml")
+    write_configfile(outfile, chip_dict_pred)
     print("---------------------------------------------------------------------------------------")
-    print("Chip-seq sample configuration is written to file ", os.path.join(wdir, "chip_seq_sample_config.yaml"))
+    print("Chip-seq sample configuration is written to file ", outfile)
     print("Please check and modify this file - this is just a guess! Then run the workflow with it.")
     print("---------------------------------------------------------------------------------------")
-    sys.exit(0)

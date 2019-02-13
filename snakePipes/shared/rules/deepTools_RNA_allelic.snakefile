@@ -42,8 +42,7 @@ rule plotEnrichment_allelic:
     input:
         bam = expand("allelic_bams/{sample}.{suffix}.sorted.bam", sample=samples, suffix = ['genome1', 'genome2']),
         bai = expand("allelic_bams/{sample}.{suffix}.sorted.bam.bai", sample=samples, suffix = ['genome1', 'genome2']),
-        gtf = "Annotation/genes.filtered.gtf",
-        gtf2= "Annotation/genes.filtered.transcripts.gtf"
+        gtf = "Annotation/genes.filtered.gtf"
     output:
         "deepTools_qc/plotEnrichment/plotEnrichment_allelic.tsv"
     conda:
@@ -93,7 +92,7 @@ rule plotCorr_bed_pearson_allelic:
         err="deepTools_qc/logs/plotCorrelation_pearson_allelic.err"
     benchmark:
         "deepTools_qc/.benchmark/plotCorrelation_pearson_allelic.benchmark"
-    params: 
+    params:
         plotcmd = "" if plot_format == 'None' else
             "--plotFile " + "deepTools_qc/plotCorrelation/correlation.pearson.bed_coverage_allelic.heatmap." + plot_format,
         title='genes'
@@ -113,7 +112,7 @@ rule plotCorr_bed_spearman_allelic:
         err="deepTools_qc/logs/plotCorrelation_spearman_allelic.err"
     benchmark:
         "deepTools_qc/.benchmark/plotCorrelation_spearman_allelic.benchmark"
-    params: 
+    params:
         plotcmd = "" if plot_format == 'None' else
             "--plotFile " + "deepTools_qc/plotCorrelation/correlation.spearman.bed_coverage_allelic.heatmap." + plot_format,
         title='genes'
@@ -133,7 +132,7 @@ rule plotPCA_allelic:
         err="deepTools_qc/logs/plotPCA_allelic.err"
     benchmark:
         "deepTools_qc/.benchmark/plotPCA_allelic.benchmark"
-    params: 
+    params:
         plotcmd = "" if plot_format == 'None' else
                 "--plotFile " + "deepTools_qc/plotPCA/PCA.bed_coverage_allelic." + plot_format,
         title='genes'

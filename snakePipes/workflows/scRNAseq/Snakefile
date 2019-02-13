@@ -23,7 +23,9 @@ include: os.path.join(maindir, "shared", "rules", "FASTQ.snakefile")
 include: os.path.join(maindir, "shared", "rules", "RNA_mapping.snakefile")
 include: os.path.join(maindir, "shared", "rules", "scRNAseq.snakefile")
 fastqc = True
+paired = True
 include: os.path.join(maindir, "shared", "rules", "FastQC.snakefile")
+paired = False
 include: os.path.join(maindir, "shared", "rules", "filter_annotation.snakefile")
 include: os.path.join(maindir, "shared", "tools" , "deeptools_cmds.snakefile")
 include: os.path.join(maindir, "shared", "rules", "deepTools_RNA.snakefile")
@@ -43,8 +45,8 @@ if trim:
 def run_Trimming(trim):
     if trim:
         file_list = [
-        expand(fastq_dir+"/{sample}.fastq.gz", sample = samples),
-        expand("FastQC_trimmed/{sample}_fastqc.html", sample = samples)
+        expand(fastq_dir+"/{sample}"+reads[0]+".fastq.gz", sample = samples),
+        expand("FastQC_trimmed/{sample}"+reads[0]+"_fastqc.html", sample = samples)
         ]
         return(file_list)
     else:
@@ -66,7 +68,8 @@ def run_RaceID(skipRaceID):
     if not skipRaceID:
         file_list = [
         "Filtered_cells_RaceID/metrics.tab.RData",
-        "Filtered_cells_RaceID/sessionInfo.txt"
+        "Filtered_cells_RaceID/sessionInfo.txt",
+        'Filtered_cells_RaceID/Stats_report.html'
         ]
         return(file_list)
     else:
@@ -104,19 +107,18 @@ onstart:
 
 ### main rule ##################################################################
 ################################################################################
-localrules: FASTQ
+localrules: FASTQ1, FASTQ2
 rule all:
     input:
-        expand("FASTQ/{sample}{read}.fastq.gz", sample = samples, read = reads),
-        expand("FASTQ_barcoded/{sample}.fastq.gz", sample = samples),
+        expand("FASTQ_barcoded/{sample}{read}.fastq.gz", sample = samples, read=reads[0]),
         run_Trimming(trim),
         expand("FastQC/{sample}{read}_fastqc.html", sample = samples, read=reads),
         expand(mapping_prg+"/{sample}.bam", sample = samples),
         expand(mapping_prg+"/{sample}.bam.bai", sample = samples),
         "Sambamba/flagstat_report_all.tsv",
+        "Annotation/genes.annotated.bed",
         "Annotation/genes.filtered.bed",
-        "Annotation/genes.filtered.gtf",
-        "Annotation/genes.filtered.transcripts.gtf",      
+        "Annotation/genes.filtered.gtf",   
         expand("Counts/{sample}.raw_counts.txt",sample = samples),
         expand("Counts/{sample}.featureCounts_summary.txt",sample = samples),
         expand("Counts/{sample}.corrected.txt",sample = samples),
@@ -128,7 +130,8 @@ rule all:
         run_deeptools_qc(),
         "deepTools_qc/bamPEFragmentSize/fragmentSize.metric.tsv",
         expand("deepTools_qc/estimateReadFiltering/{sample}_filtering_estimation.txt",sample = samples),
-        "multiQC/multiqc_report.html"
+        "multiQC/multiqc_report.html",
+        'Filtered_cells_monocle/Stats_report.html'
 
 
 ### execute after workflow finished ############################################
@@ -136,4 +139,4 @@ rule all:
 onsuccess:
     cf.cleanLogs(outdir)
     if "verbose" in config and config["verbose"]:
-        print("\n--- scRNAseq-mapcount workflow finished successfully! --------------------------------\n")
+        print("\n--- scRNAseq workflow finished successfully! --------------------------------\n")
