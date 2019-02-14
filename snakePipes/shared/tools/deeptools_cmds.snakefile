@@ -13,6 +13,7 @@ bamcompare_log2_cmd = """
                --binSize {params.bw_binsize} \
                -p {threads} \
                {params.read_extension} \
+               {params.add_read_filter} \
                {params.blacklist} > {log.out} 2> {log.err}
     """
 
@@ -27,6 +28,7 @@ bamcompare_subtract_cmd = """
                --binSize {params.bw_binsize} \
                -p {threads} \
                {params.read_extension} \
+               {params.add_read_filter} \
                {params.blacklist} > {log.out} 2> {log.err}
     """
 
@@ -69,6 +71,7 @@ bamcov_cmd = """
                 --effectiveGenomeSize {params.genome_size} \
                 {params.ignoreForNorm} \
                 {params.blacklist} \
+                {params.add_read_filter} \
                 {params.read_extension} > {log.out} 2> {log.err}
     """
 

@@ -89,10 +89,8 @@ def parse_args(defaults={"verbose": False, "configfile": None, "cluster_configfi
     optional.add_argument("--UCSCtracks",
                           dest="UCSCTracks",
                           action="store_true",
-                          help="Produce also UCSC conform bigwig tracks. Please provide the genome assembly corresponding to your selected genome config file! (eg. GRCh37, GRCm38, BDGP6)"
-                          " (default: '%(default)s')",
-                          default=defaults["UCSCTracksGenome"])
-    
+                          help="Produce also UCSC conform bigwig tracks. Please provide the genome assembly corresponding to your selected genome config file! (eg. GRCh37, GRCm38, BDGP6)")
+
     optional.add_argument("--predict_chip_dict",
                           dest="predict_chip_dict",
                           nargs='?',
@@ -101,14 +99,17 @@ def parse_args(defaults={"verbose": False, "configfile": None, "cluster_configfi
                                "If no value is given, samples that contain 'input' are used as ChIP input/ctrl. Provide a custom pattern like 'input,H3$,H4$' to change that!",
                           default= None,
                           const="input")
+    
     optional.add_argument("--fromBam",
                          dest="fromBam",
                          help=argparse.SUPPRESS,
                          default=defaults["fromBam"])
+    
     optional.add_argument("--fromBamExt",
                          dest="bam_ext",
                          help=argparse.SUPPRESS,
                          default=defaults["bam_ext"])
+    
     optional.add_argument("--plotFormat",
                          dest="plot_format",
                          choices=['png', 'pdf', 'None'],

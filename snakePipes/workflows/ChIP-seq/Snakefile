@@ -142,10 +142,8 @@ def run_UCSCTracks():
             if bigWigType == "log2ratio" or bigWigType == "both":
                 file_list.append([
                     "deepTools_ChIP/bamCompare/UCSC_tracks/"+chip_sample+".filtered.log2ratio.over_"+control_name+".UCSC_chroms.bw"])
-                ])
         file_list.append([
-            expand("bamCoverage/UCSC_tracks/{sample}.filtered.seq_depth_norm.UCSC_chroms.bw", sample = samples)
-            ])
+            expand("bamCoverage/UCSC_tracks/{sample}.filtered.seq_depth_norm.UCSC_chroms.bw", sample = samples)])
         return(file_list)
     else:
         return([])
@@ -185,7 +183,7 @@ onstart:
 ################################################################################
 rule all:
     input:
-    	run_deepTools_qc(fromBam),
+    	#run_deepTools_qc(fromBam),
         run_deepTools_ChIP(),
         run_peakCalling(allele_info,peakCallingMode),
         #expand("MACS2/{chip_sample}.filtered.BAM_peaks.xls", chip_sample = chip_samples),
