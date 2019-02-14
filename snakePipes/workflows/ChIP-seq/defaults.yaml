@@ -36,7 +36,7 @@ verbose: false
 sampleSheet:
 # window_size
 window_size: 150
-UCSCTracksGenome:
+UCSCTracks: false
 #### Flag to control the pipeline entry point
 bam_ext: '.filtered.bam'
 fromBam:

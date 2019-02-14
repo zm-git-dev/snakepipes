@@ -42,11 +42,18 @@ def parse_args(defaults={"verbose": False, "configfile": None, "cluster_configfi
                           help="Input data is single-end, not paired-end",
                           default=defaults["paired"])
 
-    optional.add_argument("--BAMPE",
-                          dest="bamPE",
-                          action="store_true",
-                          help="Use the BAMPE mode of macs2, on top of the BAM mode. The BAMPE mode would use the fragment sizes present in BAM file, and output the files under 'macs2' folder with an extention 'BAMPE_peaks.xls'. The default macs2 rule under snakePipes uses the fragment sizes estimated from deepTools, and produces files with an extention 'BAM_peaks.xls'. (default: '%(default)s')",
-                          default=defaults["bamPE"])
+#    optional.add_argument("--BAMPE",
+#                          dest="bamPE",
+#                          action="store_true",
+#                          help="Use the BAMPE mode of macs2, on top of the BAM mode. The BAMPE mode would use the fragment sizes present in BAM file, and output the files under 'macs2' folder with an extention 'BAMPE_peaks.xls'. The default macs2 rule under snakePipes uses the fragment sizes estimated from deepTools, and produces files with an extention 'BAM_peaks.xls'. (default: '%(default)s')",
+ #                         default=defaults["bamPE"])
+
+    optional.add_argument("--peakCalling",
+                          dest="peakCallingMode",
+                          help="Call peaks with different methods. Default: all Choices: all macs2BAM macs2BAMPE histoneHMM none",
+                          default="all",
+                          nargs="+",
+                          choices=['all', 'macs2BAM', 'macs2BAMPE', 'histoneHMM', 'none'])
 
     optional.add_argument("--bigWigType",
                           dest="bigWigType",
@@ -80,7 +87,8 @@ def parse_args(defaults={"verbose": False, "configfile": None, "cluster_configfi
                           default=defaults["window_size"])
 
     optional.add_argument("--UCSCtracks",
-                          dest="UCSCTracksGenome",
+                          dest="UCSCTracks",
+                          action="store_true",
                           help="Produce also UCSC conform bigwig tracks. Please provide the genome assembly corresponding to your selected genome config file! (eg. GRCh37, GRCm38, BDGP6)"
                           " (default: '%(default)s')",
                           default=defaults["UCSCTracksGenome"])

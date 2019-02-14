@@ -57,9 +57,9 @@ rule bamCoverage_filtered_UCSC:
     output:
         "bamCoverage/UCSC_tracks/{sample}.filtered.seq_depth_norm.UCSC_chroms.bw"
     params:
-        fromFormat="ensembl",
+        fromFormat=chromosome_naming,
         toFormat="UCSC",
-        genome=UCSCTracksGenome,
+        genome=genome_build,
         tool_path=os.path.join(maindir, "shared", "tools")
     log:
         out = "bamCoverage/logs/bamCoverage.{sample}.filtered.altTracks.out",
