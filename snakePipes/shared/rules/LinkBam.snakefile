@@ -5,8 +5,11 @@ rule link_bam:
         bam=mapping_prg+"/{sample}.bam",
         bai=mapping_prg+"/{sample}.bam.bai"
     conda: CONDA_SHARED_ENV
-    shell:
-        "( [ -f {output.bam} ] || ln -s -r {input} {output.bam} ); if [ -f {input}.bai ]; then ln -s -r {input}.bai {output.bai}; else samtools index {output.bam}; fi"
+    shell:"""
+        ( [ -f {output.bam} ] || ln -s -r {input} {output.bam} ); 
+        if [ -f {input}.bai ]; then ln -s -r {input}.bai {output.bai}; else samtools index {output.bam}; fi
+        touch -h -m {output.bai}
+        """
 
 #rule samtools_index_external:
 #    input:

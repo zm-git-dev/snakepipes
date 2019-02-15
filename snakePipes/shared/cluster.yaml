@@ -28,3 +28,9 @@ plotPCA:
     memory: 4G
 plotPCA_allelic:
     memory: 4G
+bamCompare_UCSC_subtract:
+    memory: 10G
+bamCompare_UCSC_log2:
+    memory: 10G
+bamCoverage_filtered_UCSC:
+    memory: 10G
