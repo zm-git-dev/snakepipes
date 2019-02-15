@@ -41,6 +41,7 @@ UCSCTracks: false
 bam_ext: '.filtered.bam'
 fromBam:
 plot_format: png
+deepTools_add_filter: "--minMappingQuality 10 --samFlagExclude 1024 --samFlagInclude 64"
 ################################################################################
 # Call snakemake directly, i.e. without using the wrapper script:
 #
