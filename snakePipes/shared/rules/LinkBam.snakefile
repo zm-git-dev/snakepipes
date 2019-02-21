@@ -26,9 +26,11 @@ rule link_bam_bai_external:
         bai = mapping_prg+"/{sample}.bam.bai"
     output:
         bam_out = "filtered_bam/{sample}.filtered.bam",
-        bai_out = "filtered_bam/{sample}.filtered.bam.bai",
-    shell:
-        "( [ -f {output.bam_out} ] || ( ln -s -r {input.bam} {output.bam_out} && ln -s -r {input.bai} {output.bai_out} ) )"
+        bai_out = "filtered_bam/{sample}.filtered.bam.bai"
+    shell:"""
+        ( [ -f {output.bam_out} ] || ( ln -s -r {input.bam} {output.bam_out} && ln -s -r {input.bai} {output.bai_out} ) );
+        touch -h -m {output.bai_out}
+        """
 
 # rule samtools_index_filtered:
 #     input:

@@ -52,21 +52,6 @@ if allele_info == 'FALSE':
 if sampleSheet:
     include: os.path.join(maindir, "shared", "rules", "CSAW.snakefile")
 
-#def run_bamPE(bamPE):
-#    if bamPE:
-#        file_list = expand("MACS2/{chip_sample}.filtered.BAMPE_peaks.xls",
-#                            chip_sample = chip_samples)
-#    else:
-#        file_list = []
-#    return(file_list)
-
-#def run_histoneHMM(allele_info):
-#    if allele_info == 'FALSE':
-#        ## run histoneHMM broad enrichment calling only for samples annotated as *broad*
-#        file_list = expand("histoneHMM/{chip_sample}.filtered.histoneHMM-regions.gff.gz", chip_sample = [s for s in chip_samples if is_broad(s)])
-#    else:
-#        file_list = []
-#    return(file_list)
 
 def run_peakCalling(allele_info,peakCallingMode):
     file_list = []
@@ -77,7 +62,7 @@ def run_peakCalling(allele_info,peakCallingMode):
     if "macs2BAMPE" in peakCallingMode or "all" in peakCallingMode:
         file_list.append([expand("MACS2/{chip_sample}.filtered.BAMPE_peaks.xls", chip_sample = chip_samples)])
     ## run histoneHMM broad enrichment calling only for samples annotated as *broad*
-    if allele_info == False and ("histoneHMM" in peakCallingMode or "all" in peakCallingMode):
+    if ("histoneHMM" in peakCallingMode or "all" in peakCallingMode) and allele_info == False:
          file_list.append([expand("histoneHMM/{chip_sample}.filtered.histoneHMM-regions.gff.gz", chip_sample = [s for s in chip_samples if is_broad(s)])])
     
     return(file_list)
@@ -87,9 +72,9 @@ def run_deepTools_qc(fromBam):
     if fromBam:
         file_list = ["deepTools_qc/bamPEFragmentSize/fragmentSize.metric.tsv"]
         file_list.append([expand("bamCoverage/{sample}.filtered.seq_depth_norm.bw", sample = samples)])
-        if len(samples) <= 20:
+        if len(samples) <= 100:
             file_list.append( ["deepTools_qc/plotCoverage/read_coverage.tsv"] )
-        if len(samples)>1 and len(samples)<=20:
+        if len(samples)>1 and len(samples)<=100:
             file_list.append( [
                 "deepTools_qc/plotCorrelation/correlation.pearson.read_coverage.tsv",
                 "deepTools_qc/plotCorrelation/correlation.spearman.read_coverage.tsv",
@@ -183,15 +168,9 @@ onstart:
 ################################################################################
 rule all:
     input:
-    	#run_deepTools_qc(fromBam),
+    	run_deepTools_qc(fromBam),
         run_deepTools_ChIP(),
         run_peakCalling(allele_info,peakCallingMode),
-        #expand("MACS2/{chip_sample}.filtered.BAM_peaks.xls", chip_sample = chip_samples),
-        #expand("MACS2/{chip_sample}.filtered.BAM_peaks.qc.txt", chip_sample = chip_samples),
-        ## run bamPE if asked
-        #run_bamPE(bamPE),
-        # run histoneHMM if allelic_bams are absent (since it gives index error without allele_specific index)
-        #run_histoneHMM(allele_info),
         ## run deeptools-allelic only if dir "allelic_bams" present and non empty
         run_deepTools_allelic(),
         ## run csaw if asked for

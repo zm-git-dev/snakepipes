@@ -10,7 +10,7 @@ bamCoverage_unique_mappings:
     memory: 5G
 bamCoverage_RPKM:
     memory: 5G
-bamCoverage_coverage:
+bamCoverage_filtered:
     memory: 5G
 bamCoverage_raw:
     memory: 5G
@@ -19,15 +19,23 @@ plotCorrelation_pearson:
 plotCorrelation_spearman:
     memory: 3G
 plotCoverage:
-    memory: 1G
+    memory: 2G
 plotEnrichment:
     memory: 1G
 plotFingerprint:
-    memory: 1G
+    memory: 2G
 plotPCA:
     memory: 4G
 plotPCA_allelic:
     memory: 4G
+bamCompare_log2:
+    memory: 2G
+bamCompare_subtract:
+    memory: 2G
+bamPE_fragment_size:
+    memory: 2G
+multiBamSummary:
+    memory: 2G
 bamCompare_UCSC_subtract:
     memory: 10G
 bamCompare_UCSC_log2:

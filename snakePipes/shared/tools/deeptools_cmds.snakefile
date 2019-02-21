@@ -139,6 +139,7 @@ multiBamSummary_cmd = """
                     -o {output} \
                     --labels {params.labels} \
                     --binSize 1000 \
+                    --distanceBetweenBins 2000 \
                     {params.blacklist} \
                     -p {threads} \
                     {params.read_extension} > {log.out} 2> {log.err}
@@ -208,7 +209,7 @@ plotCoverage_cmd = """
 #EstimateReadFiltering
 estimateReadFiltering_cmd = """
     estimateReadFiltering -b {input.bam} \
-    -o {output} > {log.out} 2> {log.err}
+    -o {output} -p {threads} > {log.out} 2> {log.err}
     """
 
 #bamPEFragmentSize
@@ -216,6 +217,7 @@ bamPEFragmentSize_cmd = """
     bamPEFragmentSize \
     --bamfiles {input.bams} \
     --binSize 1000000 \
+    --distanceBetweenBins 3000000 \
     {params.plotcmd} \
     --table {output} -p {threads} > {log.out} 2> {log.err}
     """

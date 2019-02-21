@@ -19,7 +19,7 @@ rule bamCoverage:
         err = "bamCoverage/logs/bamCoverage.{sample}.err"
     benchmark:
         "bamCoverage/.benchmark/bamCoverage.{sample}.benchmark"
-    threads: 16  # 4GB per core
+    threads: 16
     conda: CONDA_SHARED_ENV
     shell: bamcov_cmd
 
@@ -46,7 +46,7 @@ rule bamCoverage_filtered:
         err = "bamCoverage/logs/bamCoverage.{sample}.filtered.err"
     benchmark:
         "bamCoverage/.benchmark/bamCoverage.{sample}.filtered.benchmark"
-    threads: 16  # 4GB per core
+    threads: 16
     conda: CONDA_SHARED_ENV
     shell: bamcov_cmd
 
@@ -187,6 +187,7 @@ rule estimate_read_filtering:
     log:
         out = "deepTools_qc/logs/{sample}.estimateReadFiltering.out",
         err = "deepTools_qc/logs/{sample}.estimateReadFiltering.err"
+    threads: 10
     conda: CONDA_SHARED_ENV
     shell: estimateReadFiltering_cmd
 
