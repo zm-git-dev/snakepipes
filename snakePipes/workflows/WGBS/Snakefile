@@ -202,6 +202,7 @@ if not fromBam:
         input:
             expand("FASTQ/{sample}{read}.fastq.gz", sample = samples, read = reads),
             expand("FASTQ_downsampled/{sample}{read}.fastq.gz", sample = samples, read = reads),
+            expand("FastQC/{sample}{read}_fastqc.html", sample = samples, read = reads),
             convert_refG(convRef),
             expand("bams/{sample}.PCRrm.bam", sample = samples),
             expand("QC_metrics/{sample}.Mbias.txt",sample=samples),
