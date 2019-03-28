@@ -215,7 +215,8 @@ if not fromBam:
             run_metilene_all(sampleSheet),
             run_int_aggStats(intList,False),
             run_int_aggStats(intList,sampleSheet),
-            run_aggStats_report(intList,sampleSheet)
+            run_aggStats_report(intList,sampleSheet),
+            run_cutadapt(trimReads)
 
 
 else:
