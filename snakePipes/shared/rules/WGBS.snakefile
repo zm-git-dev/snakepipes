@@ -85,6 +85,24 @@ elif trimReads=='user':
 
 
 #if not trimReads is None:
+
+rule preTrimFastQC:
+    input:
+        R1="FASTQ/{sample}"+reads[0]+".fastq.gz",
+        R2="FASTQ/{sample}"+reads[1]+".fastq.gz"
+    output:
+        R1fqc="FastQC/{sample}"+reads[0]+"_fastqc.html",
+        R2fqc="FastQC/{sample}"+reads[1]+"_fastqc.html"
+    log:
+        err="FastQC/logs/{sample}.preTrimFastQC.err",
+        out="FastQC/logs/{sample}.preTrimFastQC.out"
+    params:
+        fqcout=os.path.join(outdir,'FastQC')
+    threads: nthreads
+    conda: CONDA_SHARED_ENV
+    shell: "fastqc --outdir {params.fqcout} -t  {threads} {input.R1} {input.R2} 1>{log.out} 2>{log.err}"
+
+
 rule postTrimFastQC:
     input:
         R1cut="FASTQ_Cutadapt/{sample}"+reads[0]+".fastq.gz",
