@@ -84,22 +84,22 @@ elif trimReads=='user':
 
 
 
-if not trimReads is None:
-    rule postTrimFastQC:
-        input:
-            R1cut="FASTQ_Cutadapt/{sample}"+reads[0]+".fastq.gz",
-            R2cut="FASTQ_Cutadapt/{sample}"+reads[1]+".fastq.gz"
-        output:
-            R1fqc="FastQC_Cutadapt/{sample}"+reads[0]+"_fastqc.html",
-            R2fqc="FastQC_Cutadapt/{sample}"+reads[1]+"_fastqc.html"
-        log:
-            err="FastQC_Cutadapt/logs/{sample}.postTrimFastQC.err",
-            out="FastQC_Cutadapt/logs/{sample}.postTrimFastQC.out"
-        params:
-            fqcout=os.path.join(outdir,'FastQC_Cutadapt')
-        threads: nthreads
-        conda: CONDA_SHARED_ENV
-        shell: "fastqc --outdir {params.fqcout} -t  {threads} {input.R1cut} {input.R2cut} 1>{log.out} 2>{log.err}"
+#if not trimReads is None:
+rule postTrimFastQC:
+    input:
+        R1cut="FASTQ_Cutadapt/{sample}"+reads[0]+".fastq.gz",
+        R2cut="FASTQ_Cutadapt/{sample}"+reads[1]+".fastq.gz"
+    output:
+        R1fqc="FastQC_Cutadapt/{sample}"+reads[0]+"_fastqc.html",
+        R2fqc="FastQC_Cutadapt/{sample}"+reads[1]+"_fastqc.html"
+    log:
+        err="FastQC_Cutadapt/logs/{sample}.postTrimFastQC.err",
+        out="FastQC_Cutadapt/logs/{sample}.postTrimFastQC.out"
+    params:
+        fqcout=os.path.join(outdir,'FastQC_Cutadapt')
+    threads: nthreads
+    conda: CONDA_SHARED_ENV
+    shell: "fastqc --outdir {params.fqcout} -t  {threads} {input.R1cut} {input.R2cut} 1>{log.out} 2>{log.err}"
 
 if convRef:
     rule conv_ref:
