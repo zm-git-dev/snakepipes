@@ -155,7 +155,7 @@ if not trimReads is None:
             RG=lambda wildcards: RG_dict[wildcards.sample]
         threads: nthreads
         conda: CONDA_WGBS_ENV
-        shell: "tmp_map=$(mktemp -d -p ${{TMPDIR}} -t XXXXX.{wildcards.sample});echo $tmp_map;  bwameth.py --threads  {threads}  --read-group {params.RG} --reference {input.crefG} {input.R1cut} {input.R2cut} | samtools sort -T $tmp_map -m 3G -@ {params.sortThreads} -o {output.sbam} 1>{log.out} 2>{log.err}"
+        shell: "tmp_map=$(mktemp -d -p {{$TMPDIR}} -t XXXXX.{wildcards.sample});echo $tmp_map;  bwameth.py --threads  {threads}  --read-group {params.RG} --reference {input.crefG} {input.R1cut} {input.R2cut} | samtools sort -T $tmp_map -m 3G -@ {params.sortThreads} -o {output.sbam} 1>{log.out} 2>{log.err}"
 
 if trimReads is None and not fromBam:
     rule map_reads:
