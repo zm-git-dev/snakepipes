@@ -150,12 +150,12 @@ if not trimReads is None:
             err="bams/logs/{sample}.map_reads.err",
             out="bams/logs/{sample}.map_reads.out"
         params:
-            tempdir=tempfile.mkdtemp(suffix='',prefix="{sample}",dir=tempdir),
+            #tempdir=tempfile.mkdtemp(suffix='',prefix="{sample}",dir=tempdir),
             sortThreads=min(nthreads,4),
             RG=lambda wildcards: RG_dict[wildcards.sample]
         threads: nthreads
         conda: CONDA_WGBS_ENV
-        shell: "tmp_map=$(mktemp -d -p {{$TMPDIR}} -t XXXXX.{wildcards.sample});echo $tmp_map;  bwameth.py --threads  {threads}  --read-group {params.RG} --reference {input.crefG} {input.R1cut} {input.R2cut} | samtools sort -T $tmp_map -m 3G -@ {params.sortThreads} -o {output.sbam} 1>{log.out} 2>{log.err}"
+        shell: "tmp_map=$(mktemp -d -p $TMPDIR -t XXXXX.{wildcards.sample});echo $tmp_map;  bwameth.py --threads  {threads}  --read-group {params.RG} --reference {input.crefG} {input.R1cut} {input.R2cut} | samtools sort -T $tmp_map -m 3G -@ {params.sortThreads} -o {output.sbam} 1>{log.out} 2>{log.err}"
 
 if trimReads is None and not fromBam:
     rule map_reads:
@@ -171,12 +171,12 @@ if trimReads is None and not fromBam:
             err="bams/logs/{sample}.map_reads.err",
             out="bams/logs/{sample}.map_reads.out"
         params:
-            tempdir=tempfile.mkdtemp(suffix='',prefix="{sample}",dir=tempdir),
+            #tempdir=tempfile.mkdtemp(suffix='',prefix="{sample}",dir=tempdir),
             sortThreads=min(nthreads,4),
             RG=lambda wildcards: RG_dict[wildcards.sample]
         threads: nthreads
         conda: CONDA_WGBS_ENV
-        shell: "bwameth.py --threads  {threads}  --read-group {params.RG} --reference {input.crefG} {input.R1} {input.R2} | samtools sort -T {params.tempdir} -m 3G -@ {params.sortThreads} -o {output.sbam} 1>{log.out} 2>{log.err}"
+        shell: "tmp_map=$(mktemp -d -p $TMPDIR -t XXXXX.{wildcards.sample});echo $tmp_map; bwameth.py --threads  {threads}  --read-group {params.RG} --reference {input.crefG} {input.R1} {input.R2} | samtools sort -T $tmp_map -m 3G -@ {params.sortThreads} -o {output.sbam} 1>{log.out} 2>{log.err}"
 
 if not fromBam:
     rule index_bam:
@@ -200,7 +200,7 @@ if not fromBam:
             err="bams/logs/{sample}.rm_dupes.err",
             out="bams/logs/{sample}.rm_dupes.out"
         params:
-            tempdir=tempfile.mkdtemp(suffix='',prefix='',dir=tempdir)
+            #tempdir=tempfile.mkdtemp(suffix='',prefix='',dir=tempdir)
         threads: nthreads
         conda: CONDA_SHARED_ENV
         shell: "tmp_dupes=$(mktemp -d -p $TMPDIR -t XXXXX.{wildcards.sample}); echo $tmp_dupes; sambamba markdup --remove-duplicates --tmpdir $tmp_dupes -t {threads} {input.sbam} {output.rmDupbam} 1>{log.out} 2>{log.err}"
