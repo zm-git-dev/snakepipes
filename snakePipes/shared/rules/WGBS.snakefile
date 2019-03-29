@@ -23,7 +23,7 @@ if fromBam:
         input:
             indir+"/{sample}"+bam_ext
         output:
-            "bams/{sample}"+bam_ext
+            "bams/{sample}.bam"
         shell:
             "( [ -f {output} ] || ln -s -r {input} {output} ) " #&& touch -h {output}"
 
@@ -424,7 +424,7 @@ else:
 if fromBam:
     rule get_flagstat:
         input:
-            bam="bams/{sample}"+bam_ext
+            bam="bams/{sample}.bam"
         output:
             fstat="QC_metrics/{sample}.flagstat"
         log:
