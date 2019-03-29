@@ -437,7 +437,7 @@ else:
         input:
             bam="bams/{sample}.sorted.bam"
         output:
-    ix        fstat="QC_metrics/{sample}.flagstat"
+            fstat="QC_metrics/{sample}.flagstat"
         log:
             err="QC_metrics/logs/{sample}.get_flagstat.err"
         threads: 1
