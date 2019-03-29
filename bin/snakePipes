@@ -124,7 +124,7 @@ def registerGATK(gatkEnv):
     cmd = ["wget", "-O", archive_name, "{}".format(URL)]
     subprocess.check_call(cmd)
 
-    cmd = ["{}/bin/gatk-register".format(gatkEnv), archive_name]
+    cmd = ["{}/bin/gatk3-register".format(gatkEnv), archive_name]
     subprocess.check_call(cmd)
     os.remove(archive_name)
     shutil.rmtree("/tmp/gatk")
