@@ -240,9 +240,9 @@ rule calc_Mbias:
         rmDupBam="bams/{sample}.PCRrm.bam",
         sbami="bams/{sample}.PCRrm.bam.bai"
     output:
-        mbiasTXT="QC_metrics/{sample}.PCRrm.Mbias.txt"
+        mbiasTXT="QC_metrics/{sample}.Mbias.txt"
     log:
-        out="QC_metrics/logs/{sample}.PCRrm.calc_Mbias.out"
+        out="QC_metrics/logs/{sample}.calc_Mbias.out"
     threads: nthreads
     conda: CONDA_WGBS_ENV
     shell: "MethylDackel mbias {input.refG} {input.rmDupBam} {output.mbiasTXT} -@ {threads} 1>{log.out} 2>{output.mbiasTXT}"
@@ -279,8 +279,8 @@ if convRef:
                 gsize="aux_files/gsize.txt",
                 twobit="aux_files/"+ re.sub(".fa",".2bit",os.path.basename(refG))
             output:
-                GCbiasTXT="QC_metrics/{sample}.PCRrm.freq.txt",
-                GCbiasPNG="QC_metrics/{sample}.PCRrm.GCbias.png"
+                GCbiasTXT="QC_metrics/{sample}.freq.txt",
+                GCbiasPNG="QC_metrics/{sample}.GCbias.png"
             log:
                 out="QC_metrics/logs/{sample}.calc_GCbias.out"
             threads: nthreads
@@ -295,13 +295,13 @@ else:
                 rmDupBam="bams/{sample}.PCRrm.bam",
                 sbami="bams/{sample}.PCRrm.bam.bai"
             output:
-                GCbiasTXT="QC_metrics/{sample}.PCRrm.freq.txt",
-                GCbiasPNG="QC_metrics/{sample}.PCRrm.GCbias.png"
+                GCbiasTXT="QC_metrics/{sample}.freq.txt",
+                GCbiasPNG="QC_metrics/{sample}.GCbias.png"
             params:
                 genomeSize=genome_size,
                 twobitpath=genome_2bit
             log:
-                out="QC_metrics/logs/{sample}.PCRrm.calc_GCbias.out"
+                out="QC_metrics/logs/{sample}.calc_GCbias.out"
             threads: nthreads
             conda: CONDA_SHARED_ENV
             shell: "computeGCBias -b {input.rmDupBam} --effectiveGenomeSize {params.genomeSize} -g {params.twobitpath} -l 300 --GCbiasFrequenciesFile {output.GCbiasTXT} -p {threads} --biasPlot {output.GCbiasPNG} --plotFileFormat png "
@@ -325,8 +325,8 @@ if not skipDOC:
                 OUTlist1=lambda wildcards,output: [w.replace('.sample_summary', '') for w in output.outFileList][1],
                 auxshell=lambda wildcards,input,output: ';'.join("gatk -Xmx30g -Djava.io.tmpdir="+ tempdir +" -T DepthOfCoverage -R "+ input.irefG +" -o "+ oi +" -I " + input.rmDupBam + " -ct 0 -ct 1 -ct 2 -ct 5 -ct 10 -ct 15 -ct 20 -ct 30 -ct 50  -omitBaseOutput -mmq 10 --partitionType sample -L " + bi for oi,bi in zip([w.replace('.sample_summary', '') for w in output.outFileList][2:],input.intList))
             log:
-                err="QC_metrics/logs/{sample}.PCRrm.depth_of_cov.err",
-                out="QC_metrics/logs/{sample}.PCRrm.depth_of_cov.out"
+                err="QC_metrics/logs/{sample}.depth_of_cov.err",
+                out="QC_metrics/logs/{sample}.depth_of_cov.out"
             threads: 1
             conda: CONDA_WGBS_ENV
             shell: "gatk -Xmx30g -Djava.io.tmpdir={params.tempdir} -T DepthOfCoverage -R {input.irefG} -o {params.OUTlist0} -I {input.rmDupBam} -ct 0 -ct 1 -ct 2 -ct 5 -ct 10 -ct 15 -ct 20 -ct 30 -ct 50  -omitBaseOutput -mmq 10 --partitionType sample ; gatk -Xmx30g -Djava.io.tmpdir={params.tempdir}  -T DepthOfCoverage -R {input.irefG} -o {params.OUTlist1} -I {input.rmDupBam} -ct 0 -ct 1 -ct 2 -ct 5 -ct 10 -ct 15 -ct 20 -ct 30 -ct 50  -omitBaseOutput -mmq 10 --partitionType sample -L {input.ranCG}; {params.auxshell} 1>{log.out} 2>{log.err}"
@@ -347,8 +347,8 @@ if not skipDOC:
                 OUTlist0=lambda wildcards,output: output.outFileList[0].replace('.sample_summary', ''),
                 OUTlist1=lambda wildcards,output: output.outFileList[1].replace('.sample_summary','')
             log:
-                err="QC_metrics/logs/{sample}.PCRrm.depth_of_cov.err",
-                out="QC_metrics/logs/{sample}.PCRrm.depth_of_cov.out"
+                err="QC_metrics/logs/{sample}.depth_of_cov.err",
+                out="QC_metrics/logs/{sample}.depth_of_cov.out"
             threads: 1
             conda: CONDA_WGBS_ENV
             shell: "gatk -Xmx30g -Djava.io.tmpdir={params.tempdir} -T DepthOfCoverage -R {input.irefG} -o {params.OUTlist0} -I {input.rmDupBam} -ct 0 -ct 1 -ct 2 -ct 5 -ct 10 -ct 15 -ct 20 -ct 30 -ct 50  -omitBaseOutput -mmq 10 --partitionType sample ; gatk -Xmx30g -Djava.io.tmpdir={params.tempdir}  -T DepthOfCoverage -R {input.irefG} -o {params.OUTlist1} -I {input.rmDupBam} -ct 0 -ct 1 -ct 2 -ct 5 -ct 10 -ct 15 -ct 20 -ct 30 -ct 50  -omitBaseOutput -mmq 10 --partitionType sample -L {input.ranCG} 1>{log.out} 2>{log.err}"
@@ -437,7 +437,7 @@ else:
         input:
             bam="bams/{sample}.sorted.bam"
         output:
-            fstat="QC_metrics/{sample}.flagstat"
+    ix        fstat="QC_metrics/{sample}.flagstat"
         log:
             err="QC_metrics/logs/{sample}.get_flagstat.err"
         threads: 1
