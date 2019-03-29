@@ -166,7 +166,7 @@ if trimReads is None and not fromBam:
             R2="FASTQ/{sample}"+reads[1]+".fastq.gz",
             crefG=crefG
         output:
-            sbam=temp("bams/{sample}.sorted.bam")
+            sbam="bams/{sample}.sorted.bam"
         log:
             err="bams/logs/{sample}.map_reads.err",
             out="bams/logs/{sample}.map_reads.out"
@@ -203,7 +203,7 @@ if not fromBam:
             tempdir=tempfile.mkdtemp(suffix='',prefix='',dir=tempdir)
         threads: nthreads
         conda: CONDA_SHARED_ENV
-        shell: "sambamba markdup --remove-duplicates -t {threads} {input.sbam} {output.rmDupbam} 1>{log.out} 2>{log.err}"
+        shell: "tmp_dupes=$(mktemp -d -p {{$TMPDIR}} -t XXXXX.{wildcards.sample}); echo $tmp_dupes; sambamba markdup --remove-duplicates --tmpdir $tmp_dupes -t {threads} {input.sbam} {output.rmDupbam} 1>{log.out} 2>{log.err}"
 
 rule index_PCRrm_bam:
     input:
