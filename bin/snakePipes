@@ -119,7 +119,7 @@ def registerGATK(gatkEnv):
     #URL="https://software.broadinstitute.org/gatk/download/auth?package=GATK-archive&version=3.5-0-g36282e4"
     URL="https://software.broadinstitute.org/gatk/download/auth?package=GATK-archive&version=3.8-1-0-gf15c1c3ef"
     #achive_name = "GATK-archive-3.5.tar.bz2"
-    achive_name = "GATK-archive-3.8-1.tar.bz2"
+    archive_name = "GATK-archive-3.8-1.tar.bz2"
     
     cmd = ["wget", "-O", archive_name, "{}".format(URL)]
     subprocess.check_call(cmd)
