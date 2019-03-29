@@ -203,7 +203,7 @@ if not fromBam:
             #tempdir=tempfile.mkdtemp(suffix='',prefix='',dir=tempdir)
         threads: nthreads
         conda: CONDA_SHARED_ENV
-        shell: "tmp_dupes=$(mktemp -d -p $TMPDIR -t XXXXX.{wildcards.sample}); echo $tmp_dupes; sambamba markdup --remove-duplicates --tmpdir $tmp_dupes -t {threads} {input.sbam} {output.rmDupbam} 1>{log.out} 2>{log.err}"
+        shell: "tmp_dupes=$(mktemp -d -p $TMPDIR -t XXXXX.{wildcards.sample}); echo $tmp_dupes; sambamba markdup --hash-table-size=4194304 --remove-duplicates --tmpdir $tmp_dupes -t {threads} {input.sbam} {output.rmDupbam} 1>{log.out} 2>{log.err}"
 
 rule index_PCRrm_bam:
     input:
