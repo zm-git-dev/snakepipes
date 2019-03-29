@@ -7,7 +7,7 @@ dependencies:
   - methyldackel=0.3.0
   - metilene=0.2.6
   - bedtools=2.27.1
-  - gatk=3.5
+  - gatk=3.8
   - bioconductor-limma=3.34.9
   - picard = 2.18.7
   - r-car=2.1_4

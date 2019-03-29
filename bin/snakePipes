@@ -116,13 +116,17 @@ def envInfo():
 
 
 def registerGATK(gatkEnv):
-    URL="https://software.broadinstitute.org/gatk/download/auth?package=GATK-archive&version=3.5-0-g36282e4"
-    cmd = ["wget", "-O", "GATK-archive-3.5.tar.bz2", "{}".format(URL)]
+    #URL="https://software.broadinstitute.org/gatk/download/auth?package=GATK-archive&version=3.5-0-g36282e4"
+    URL="https://software.broadinstitute.org/gatk/download/auth?package=GATK-archive&version=3.8-1-0-gf15c1c3ef"
+    #achive_name = "GATK-archive-3.5.tar.bz2"
+    achive_name = "GATK-archive-3.8-1.tar.bz2"
+    
+    cmd = ["wget", "-O", archive_name, "{}".format(URL)]
     subprocess.check_call(cmd)
 
-    cmd = ["{}/bin/gatk-register".format(gatkEnv), "GATK-archive-3.5.tar.bz2"]
+    cmd = ["{}/bin/gatk-register".format(gatkEnv), archive_name]
     subprocess.check_call(cmd)
-    os.remove("GATK-archive-3.5.tar.bz2")
+    os.remove(archive_name)
     shutil.rmtree("/tmp/gatk")
 
 
