@@ -155,7 +155,7 @@ if not trimReads is None:
             RG=lambda wildcards: RG_dict[wildcards.sample]
         threads: nthreads
         conda: CONDA_WGBS_ENV
-        shell: "bwameth.py --threads  {threads}  --read-group {params.RG} --reference {input.crefG} {input.R1cut} {input.R2cut} | samtools sort -T {params.tempdir} -m 3G -@ {params.sortThreads} -o {output.sbam} 1>{log.out} 2>{log.err}"
+        shell: "tmp_map=$(mktemp -d -p ${{TMPDIR}} -t XXXXX.{sample}); bwameth.py --threads  {threads}  --read-group {params.RG} --reference {input.crefG} {input.R1cut} {input.R2cut} | samtools sort -T ${{tmp_map}} -m 3G -@ {params.sortThreads} -o {output.sbam} 1>{log.out} 2>{log.err}"
 
 if trimReads is None and not fromBam:
     rule map_reads:
@@ -203,7 +203,7 @@ if not fromBam:
             tempdir=tempfile.mkdtemp(suffix='',prefix='',dir=tempdir)
         threads: nthreads
         conda: CONDA_SHARED_ENV
-        shell: "sambamba markdup --remove-duplicates -t {threads} --tmpdir {params.tempdir} {input.sbam} {output.rmDupbam} 1>{log.out} 2>{log.err}"
+        shell: "sambamba markdup --remove-duplicates -t {threads} --tmpdir ${{TMPDIR}}{params.tempdir} {input.sbam} {output.rmDupbam} 1>{log.out} 2>{log.err}"
 
 rule index_PCRrm_bam:
     input:
