@@ -866,6 +866,3 @@ rule per_base_cov_custom:
     shell:"""
         cat <(echo -e 'chr\tpos\t'$(echo '{input.bams}' | tr ' ' '\n' | sed 's/.*\///' | sed 's/.PCRrm.bam//g' | tr '\n' '\t')) <(samtools depth -a -q 20 -Q 20 {input.bams} -b {params.targets} ) > {output} 2>{log.err}
         """
-
-rule mean_methyl_per region:
-    input
