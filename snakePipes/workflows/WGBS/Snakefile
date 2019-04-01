@@ -227,6 +227,7 @@ if not fromBam:
             "custom_stats/targets.CpG.bed",
             "custom_stats/targets.CpG.coverage.txt",
             "custom_stats/mean_coverage_per_base.targets.bed",
+            "custom_stats/mean_methyl_per_region.tsv",
             run_cutadapt(trimReads)
 
 

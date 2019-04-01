@@ -912,3 +912,18 @@ rule mean_target_coverage:
             -c $(cat {input} | awk '{{}}END{{for (i=4;i<=NF;i++){{printf i","}}; print NF+1}}') \
             -o mean -prec 4) > {output} 2>{log.err}
         """
+
+rule mean_methyl_per_region:
+    input:
+        expand("custom_stats/{sample}.mean_methyl_per_region.tsv",sample=samples)
+    output:
+        "custom_stats/mean_methyl_per_region.tsv"
+    params:
+        script = os.path.join(workflow_rscripts,"merge_methyl_data.R")
+    log:
+        err="custom_stats/logs/mean_methyl_per_region.err",
+        out="custom_stats/logs/mean_methyl_per_region.out"
+    conda: CONDA_WGBS_ENV
+    shell:"""
+            Rscript {params.script} > {log.out} 2> {log.err}
+        """
