@@ -755,7 +755,7 @@ if intList:
             targets=intList,
             labels = " ".join(samples)
         log:
-            err="customs_stats/logs/on_target_stats.all_reads.err"
+            err="customs_stats/logs/on_target_stats.all_reads.err",
             out="customs_stats/logs/on_target_stats.all_reads.out"
         threads: nthreads
         shell:"""
@@ -780,7 +780,7 @@ rule on_target_rate_mapq:
             targets=intList,
             labels = " ".join(samples)
         log:
-            err="customs_stats/logs/on_target_stats.mapq20.err"
+            err="customs_stats/logs/on_target_stats.mapq20.err",
             out="customs_stats/logs/on_target_stats.mapq20.out"
         threads: nthreads
         shell:"""
