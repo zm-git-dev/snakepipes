@@ -218,8 +218,8 @@ if not fromBam:
             run_int_aggStats(intList,sampleSheet),
             run_aggStats_report(intList,sampleSheet),
             "custom_stats/on_target_stats.all_reads.txt",
-            "custom_stats/on_target_stats.mapq20.txt"
-            #run_cutadapt(trimReads)
+            "custom_stats/on_target_stats.mapq20.txt",
+            run_cutadapt(trimReads)
 
 
 else:

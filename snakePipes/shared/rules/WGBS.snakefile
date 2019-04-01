@@ -69,8 +69,8 @@ elif trimReads=='user':
             R1 = "FASTQ/{sample}"+reads[0]+".fastq.gz",
             R2 = "FASTQ/{sample}"+reads[1]+".fastq.gz"
         output:
-            R1cut=temp("FASTQ_Cutadapt/{sample}"+reads[0]+".fastq.gz"),
-            R2cut=temp("FASTQ_Cutadapt/{sample}"+reads[1]+".fastq.gz")
+            R1cut="FASTQ_Cutadapt/{sample}"+reads[0]+".fastq.gz",
+            R2cut="FASTQ_Cutadapt/{sample}"+reads[1]+".fastq.gz"
         log:
             err="FASTQ_Cutadapt/logs/{sample}.trimReads.err",
             out="FASTQ_Cutadapt/logs/{sample}.trimReads.out"
@@ -183,7 +183,7 @@ if not fromBam:
         input:
             sbam="bams/{sample}.sorted.bam"
         output:
-            sbami=temp("bams/{sample}.sorted.bam.bai")
+            sbami="bams/{sample}.sorted.bam.bai"
         log:
             err="bams/logs/{sample}.index_bam.err",
             out="bams/logs/{sample}.index_bam.out"
