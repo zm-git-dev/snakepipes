@@ -783,6 +783,7 @@ rule on_target_rate_mapq:
             err="customs_stats/logs/on_target_stats.mapq20.err",
             out="customs_stats/logs/on_target_stats.mapq20.out"
         threads: nthreads
+        conda: CONDA_SHARED_ENV
         shell:"""
             plotEnrichment -p {threads} \
                    -b {input.bams} \
@@ -820,5 +821,10 @@ rule per_base_cov_custom:
         "cutoms_stats/coverage_per_base.targets.bed"
     params:
         targets=intList
-    shell:
-    """cat <(echo -e 'chr\tpos\t'$(echo {input.bams} | sed 's/.*\///' | sed 's/.PCRrm.bam//' | tr '\n' '\t')) <(samtools depth -a -q 20 -Q 20 {input.bams} -b {params.targets} ) > {output}"
+    conda: CONDA_SHARED_ENV
+    log:
+        err="custom_stats/logs/coverage_per_base.targets.err",
+        out="custom_stats/logs/coverage_per_base.targets.out"
+    shell:"""
+        cat <(echo -e 'chr\tpos\t'$(echo {input.bams} | sed 's/.*\///' | sed 's/.PCRrm.bam//' | tr '\n' '\t')) <(samtools depth -a -q 20 -Q 20 {input.bams} -b {params.targets} ) > {output} 1>{log.out} 2>{log.err}
+        """
