@@ -864,7 +864,7 @@ rule per_base_cov_custom:
         err="custom_stats/logs/coverage_per_base.targets.err",
         out="custom_stats/logs/coverage_per_base.targets.out"
     shell:"""
-        cat <(echo -e 'chr\tpos\t'$(echo '{input.bams}' | tr ' ' '\n' | sed 's/.*\///' | sed 's/.PCRrm.bam//g' | tr '\n' '\t')) <(samtools depth -a -q 20 -Q 20 {input.bams} -b <(cat {params.targets} | awk '{{OFS="\t";print $1,$2-1,$3-1}}') ) > {output} 2>{log.err}
+        cat <(echo -e '#chr\tpos\t'$(echo '{input.bams}' | tr ' ' '\n' | sed 's/.*\///' | sed 's/.PCRrm.bam//g' | tr '\n' '\t')) <(samtools depth -a -q 20 -Q 20 {input.bams} -b <(cat {params.targets} | awk '{{OFS="\t";print $1,$2-1,$3-1}}') ) > {output} 2>{log.err}
         """
 
 rule target_cpgs:
@@ -891,8 +891,24 @@ rule target_cpg_coverage:
         err="custom_stats/logs/targets.CpG.coverage.err"
     conda: CONDA_SHARED_ENV
     shell: """
-        cat <(echo -e 'chr\tpos\t'$(echo '{input.bams}' | tr ' ' '\n' | sed 's/.*\///' | sed 's/.PCRrm.bam//g' | tr '\n' '\t')) <(samtools depth -a -q 20 -Q 20 -b {input.cpg} {input.bams}) > {output} 2>{log.err}
+        cat <(echo -e '#chr\tpos\t'$(echo '{input.bams}' | tr ' ' '\n' | sed 's/.*\///' | sed 's/.PCRrm.bam//g' | tr '\n' '\t')) <(samtools depth -a -q 20 -Q 20 -b {input.cpg} {input.bams}) > {output} 2>{log.err}
     """
     
 
-
+rule mean_target_coverage:
+    input:
+        "custom_stats/coverage_per_base.targets.bed"
+    output:
+        "custom_stats/mean_coverage_per_base.targets.bed"
+    params:
+        targets=intList
+    log:
+        err="custom_stats/logs/mean_coverage_per_base.targets.err"
+    conda: CONDA_WGBS_ENV
+    shell:"""
+        cat <(cat {input} | head -n1 | awk '{{OFS="\t";$2="start\tend";print $0}}') \
+            <(bedtools map -a {params.targets} -b <(cat {input} | \
+              awk '{{OFS="\t";$2=$2-1"\t"$2; print $0}}') \
+            -c $(cat {input | awk '{{}}END{{for (i=4;i<=NF;i++){{printf i","}}; print NF+1}}') \
+            -o mean -prec 4) > {output} 2>{log.err}
+        """
