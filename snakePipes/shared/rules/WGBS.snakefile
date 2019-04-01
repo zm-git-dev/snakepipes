@@ -795,6 +795,37 @@ rule on_target_rate_mapq:
                    --minMappingQuality 20 1> {log.out} 2> {log.err}
             """
 
+rule on_target_reads_region:
+        input:
+            bams=expand("bams/{sample}.PCRrm.bam",sample=samples)
+        output:
+            tabq20="custom_stats/on_target_stats.per_region.mapq20.tsv",
+            tab="custom_stats/on_target_stats.per_region.tsv"
+        params:
+            targets=intList,
+            labels = " ".join(samples)
+        log:
+            err="custom_stats/logs/on_target_stats.per_region.err",
+            out="custom_stats/logs/on_target_stats.per_region.out"
+        threads: nthreads
+        conda: CONDA_SHARED_ENV
+        shell:"""
+            multiBamSummary BED-file \
+                -b {input.bams} \
+                --BED {params.targets} \
+                --outRawCounts {output.tabq20} \
+                --minMappingQuality 20 \
+                --labels {params.labels} \
+                -p {threads} 1> {log.out} 2> {log.err};
+            multiBamSummary BED-file \
+                -b {input.bams} \
+                --BED {params.targets} \
+                --outRawCounts {output.tab} \
+                --minMappingQuality 0 \
+                --labels {params.labels} \
+                -p {threads} 1>> {log.out} 2>> {log.err};
+            """
+
 rule methyl_extract_custom:
         input:
             rmDupbam="bams/{sample}.PCRrm.bam",
