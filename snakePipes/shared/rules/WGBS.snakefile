@@ -817,13 +817,6 @@ rule on_target_reads_region:
                 --minMappingQuality 20 \
                 --labels {params.labels} \
                 -p {threads} 1> {log.out} 2> {log.err};
-            multiBamSummary BED-file \
-                -b {input.bams} \
-                --BED {params.targets} \
-                --outRawCounts {output.tab} \
-                --minMappingQuality 0 \
-                --labels {params.labels} \
-                -p {threads} 1>> {log.out} 2>> {log.err};
             """
 
 rule methyl_extract_custom:
