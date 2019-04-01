@@ -812,3 +812,13 @@ rule methyl_extract_custom:
         threads: nthreads
         conda: CONDA_WGBS_ENV
         shell: "MethylDackel extract -o {params.OUTpfx} -l targets -q 20 -p 20 --minDepth 1 --mergeContext -@ {threads} {input.refG} " + os.path.join(outdir,"{input.rmDupbam}") + " 1>{log.out} 2>{log.err}"
+
+rule per_base_cov_custom:
+    input:
+        bams="bams/{sample}.PCRrm.bam",
+    output:
+        "cutoms_stats/coverage_per_base.targets.bed"
+    params:
+        targets=intList
+    shell:
+    """cat <(echo -e 'chr\tpos\t'$(echo {input.bams} | sed 's/.*\///' | sed 's/.PCRrm.bam//' | tr '\n' '\t')) <(samtools depth -a -q 20 -Q 20 {input.bams} -b {params.targets} ) > {output}"
