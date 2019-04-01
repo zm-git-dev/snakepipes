@@ -925,5 +925,5 @@ rule mean_methyl_per_region:
         out="custom_stats/logs/mean_methyl_per_region.out"
     conda: CONDA_WGBS_ENV
     shell:"""
-            Rscript {params.script} > {log.out} 2> {log.err}
+            Rscript {params.script} 2> {log.err}
         """
