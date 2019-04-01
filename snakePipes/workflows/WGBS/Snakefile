@@ -220,6 +220,7 @@ if not fromBam:
             "custom_stats/on_target_stats.all_reads.txt",
             "custom_stats/on_target_stats.mapq20.txt",
             expand("custom_stats/{sample}_CpG.bedGraph",sample=samples),
+            expand("custom_stats/{sample}.mean_methyl_per_region.tsv",sample=samples),
             "custom_stats/coverage_per_base.targets.bed",
             "custom_stats/on_target_stats.per_region.mapq20.tsv",
             "custom_stats/on_target_stats.per_region.tsv",

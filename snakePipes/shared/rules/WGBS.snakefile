@@ -833,7 +833,8 @@ rule methyl_extract_custom:
             sbami="bams/{sample}.PCRrm.bam.bai",
             refG=refG
         output:
-            methTab="custom_stats/{sample}_CpG.bedGraph"
+            methTab="custom_stats/{sample}_CpG.bedGraph",
+            meanTab="custom_stats/{sample}.mean_methyl_per_region.tsv"
         params:
             mbias_ignore=mbias_ignore,
             targets=intList,
@@ -843,7 +844,13 @@ rule methyl_extract_custom:
             out="custom_stats/logs/{sample}.methyl_extract.out"
         threads: nthreads
         conda: CONDA_WGBS_ENV
-        shell: "MethylDackel extract -o {params.OUTpfx} -l {params.targets} -q 20 -p 20 --minDepth 1 --mergeContext -@ {threads} {input.refG} " + os.path.join(outdir,"{input.rmDupbam}") + " 1>{log.out} 2>{log.err}"
+        shell: """
+            MethylDackel extract -o {params.OUTpfx} -l {params.targets} \
+                -q 20 -p 20 --minDepth 1 --mergeContext -@ {threads} \
+                {input.refG} {input.rmDupbam} 1>{log.out} 2>{log.err};
+            bedtools map -a {input.targets} -b {output.methTab} \
+                -c 4 -o mean > {output.meanTab} 2>>{log.err}
+            """
 
 rule per_base_cov_custom:
     input:
@@ -859,3 +866,6 @@ rule per_base_cov_custom:
     shell:"""
         cat <(echo -e 'chr\tpos\t'$(echo '{input.bams}' | tr ' ' '\n' | sed 's/.*\///' | sed 's/.PCRrm.bam//g' | tr '\n' '\t')) <(samtools depth -a -q 20 -Q 20 {input.bams} -b {params.targets} ) > {output} 2>{log.err}
         """
+
+rule mean_methyl_per region:
+    input
