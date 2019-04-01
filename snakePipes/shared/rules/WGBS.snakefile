@@ -795,3 +795,20 @@ rule on_target_rate_mapq:
                    --minMappingQuality 20 1> {log.out} 2> {log.err}
             """
 
+rule methyl_extract_custom:
+        input:
+            rmDupbam="bams/{sample}.PCRrm.bam",
+            sbami="bams/{sample}.PCRrm.bam.bai",
+            refG=refG
+        output:
+            methTab="custom_stats/{sample}_CpG.bedGraph"
+        params:
+            mbias_ignore=mbias_ignore,
+            targets=intList,
+            OUTpfx=lambda wildcards,output: os.path.join(outdir,re.sub('_CpG.bedGraph','',output.methTab))
+        log:
+            err="custom_stats/logs/{sample}.methyl_extract.err",
+            out="custom_stats/logs/{sample}.methyl_extract.out"
+        threads: nthreads
+        conda: CONDA_WGBS_ENV
+        shell: "MethylDackel extract -o {params.OUTpfx} -l targets -q 20 -p 20 --minDepth 1 --mergeContext -@ {threads} {input.refG} " + os.path.join(outdir,"{input.rmDupbam}") + " 1>{log.out} 2>{log.err}"

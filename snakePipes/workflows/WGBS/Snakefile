@@ -219,6 +219,7 @@ if not fromBam:
             run_aggStats_report(intList,sampleSheet),
             "custom_stats/on_target_stats.all_reads.txt",
             "custom_stats/on_target_stats.mapq20.txt",
+            expand("custom_stats/{sample}_CpG.bedGraph",sample=samples),
             run_cutadapt(trimReads)
 
 
