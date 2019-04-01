@@ -887,9 +887,11 @@ rule target_cpg_coverage:
         cpg="custom_stats/targets.CpG.bed"
     output:
         "custom_stats/targets.CpG.coverage.txt"
+    log:
+        err="custom_stats/logs/targets.CpG.coverage.err"
     conda: CONDA_SHARED_ENV
     shell: """
-        cat <(echo -e 'chr\tpos\t'$(echo '{input.bams}' | tr ' ' '\n' | sed 's/.*\///' | sed 's/.PCRrm.bam//g' | tr '\n' '\t')) <(samtools depth -a -q 20 -Q 20 -b {input.cpg} {input.bams})
+        cat <(echo -e 'chr\tpos\t'$(echo '{input.bams}' | tr ' ' '\n' | sed 's/.*\///' | sed 's/.PCRrm.bam//g' | tr '\n' '\t')) <(samtools depth -a -q 20 -Q 20 -b {input.cpg} {input.bams}) > {output} 2>{log.err}
     """
     
 
