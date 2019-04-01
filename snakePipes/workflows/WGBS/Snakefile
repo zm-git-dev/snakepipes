@@ -220,7 +220,7 @@ if not fromBam:
             "custom_stats/on_target_stats.all_reads.txt",
             "custom_stats/on_target_stats.mapq20.txt",
             expand("custom_stats/{sample}_CpG.bedGraph",sample=samples),
-            "cutoms_stats/coverage_per_base.targets.bed",
+            "custom_stats/coverage_per_base.targets.bed",
             run_cutadapt(trimReads)
 
 
