@@ -755,8 +755,8 @@ if intList:
             targets=intList,
             labels = " ".join(samples)
         log:
-            err="customs_stats/logs/on_target_stats.all_reads.err",
-            out="customs_stats/logs/on_target_stats.all_reads.out"
+            err="custom_stats/logs/on_target_stats.all_reads.err",
+            out="custom_stats/logs/on_target_stats.all_reads.out"
         threads: nthreads
         shell:"""
             plotEnrichment -p {threads} \
@@ -780,8 +780,8 @@ rule on_target_rate_mapq:
             targets=intList,
             labels = " ".join(samples)
         log:
-            err="customs_stats/logs/on_target_stats.mapq20.err",
-            out="customs_stats/logs/on_target_stats.mapq20.out"
+            err="custom_stats/logs/on_target_stats.mapq20.err",
+            out="custom_stats/logs/on_target_stats.mapq20.out"
         threads: nthreads
         conda: CONDA_SHARED_ENV
         shell:"""
@@ -812,13 +812,13 @@ rule methyl_extract_custom:
             out="custom_stats/logs/{sample}.methyl_extract.out"
         threads: nthreads
         conda: CONDA_WGBS_ENV
-        shell: "MethylDackel extract -o {params.OUTpfx} -l targets -q 20 -p 20 --minDepth 1 --mergeContext -@ {threads} {input.refG} " + os.path.join(outdir,"{input.rmDupbam}") + " 1>{log.out} 2>{log.err}"
+        shell: "MethylDackel extract -o {params.OUTpfx} -l {params.targets} -q 20 -p 20 --minDepth 1 --mergeContext -@ {threads} {input.refG} " + os.path.join(outdir,"{input.rmDupbam}") + " 1>{log.out} 2>{log.err}"
 
 rule per_base_cov_custom:
     input:
         bams=expand("bams/{sample}.PCRrm.bam",sample=samples)
     output:
-        "cutoms_stats/coverage_per_base.targets.bed"
+        "custom_stats/coverage_per_base.targets.bed"
     params:
         targets=intList
     conda: CONDA_SHARED_ENV
