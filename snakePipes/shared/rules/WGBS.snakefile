@@ -866,3 +866,31 @@ rule per_base_cov_custom:
     shell:"""
         cat <(echo -e 'chr\tpos\t'$(echo '{input.bams}' | tr ' ' '\n' | sed 's/.*\///' | sed 's/.PCRrm.bam//g' | tr '\n' '\t')) <(samtools depth -a -q 20 -Q 20 {input.bams} -b {params.targets} ) > {output} 2>{log.err}
         """
+
+rule target_cpgs:
+    input:
+        "aux_files/genome.CpG.bed"
+    params:
+        targets=intList
+    output:
+        "custom_stats/targets.CpG.bed"
+    log:
+        err="custom_stats/logs/targets.CpG.err"
+    conda: CONDA_WGBS_ENV
+    shell:"""
+        bedtools intersect -a <(cat {params.targets} | awk '{OFS="\t";$2=$2-1;$3=$3+2; print$0}') -b {input} -wo | awk '{OFS="\t"; print $4,$5,$6,$1"_"$2,0,$7,$8}' > {output} 2>{log.err}
+    """
+
+rule target_cpg_coverage:
+    input:
+        bams=expand("bams/{sample}.PCRrm.bam",sample=samples),
+        cpg="custom_stats/targets.CpG.bed"
+    output:
+        "custom_stats/targets.CpG.coverage.txt"
+    conda: CONDA_SHARED_ENV
+    shell: """
+        cat <(echo -e 'chr\tpos\t'$(echo '{input.bams}' | tr ' ' '\n' | sed 's/.*\///' | sed 's/.PCRrm.bam//g' | tr '\n' '\t')) <(samtools depth -a -q 20 -Q 20 -b {input.cpg} {input.bams})
+    """
+    
+
+
