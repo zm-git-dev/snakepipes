@@ -766,8 +766,7 @@ if intList:
                    --labels {params.labels} \
                    --plotTitle 'Fraction of reads in target regions' \
                    --outRawCounts {output.tab} \
-                   --variableScales
-                   --minMappingQuality 0 1> {log.out} 2> {log.err}
+                   --variableScales > {log.out} 2> {log.err}
             """
 
 rule on_target_rate_mapq:
@@ -792,7 +791,7 @@ rule on_target_rate_mapq:
                    --labels {params.labels} \
                    --plotTitle 'Fraction of reads in target regions' \
                    --outRawCounts {output.tab} \
-                   --variableScales
+                   --variableScales \
                    --minMappingQuality 20 1> {log.out} 2> {log.err}
             """
 
