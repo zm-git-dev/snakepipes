@@ -917,7 +917,7 @@ rule mean_methyl_per_region:
     input:
         expand("custom_stats/{sample}.mean_methyl_per_region.tsv",sample=samples)
     output:
-        "mean_methyl_per_region.tsv"
+        "custom_stats/mean_methyl_per_region.tsv"
     params:
         indir="custom_stats/",
         script = os.path.join(workflow_rscripts,"merge_methyl_data.R")
@@ -926,5 +926,5 @@ rule mean_methyl_per_region:
         out="custom_stats/logs/mean_methyl_per_region.out"
     conda: CONDA_WGBS_ENV
     shell:"""
-            cd customs_stats; Rscript {params.script} {params.indir} {output} 2> {log.err}; cd ..
+            Rscript {params.script} {params.indir} {output} 2> {log.err}; cd ..
         """
