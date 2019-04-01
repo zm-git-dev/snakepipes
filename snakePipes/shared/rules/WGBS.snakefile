@@ -744,3 +744,54 @@ if intList:
             conda: CONDA_RMD_ENV
             threads: 1
             shell: "cp -v {params.rmd_in} {params.rmd_out} ;Rscript -e 'rmarkdown::render(\"{params.rmd_out}\", params=list(outdir=\"{params.statdir}\", input_func=\"{params.importfunc}\", stat_category=\"{params.stat_cat}\",sample_sheet=\"{params.sampleSheet}\"), output_file=\"{params.outFull}\")' 1>{log.out} 2>{log.err}"
+        
+    rule on_target_rate:
+        input:
+            bams=expand("bams/{sample}.PCRrm.bam",sample=samples)
+        output:
+            tab="custom_stats/on_target_stats.all_reads.txt",
+            plot="custom_stats/on_target_stats.all_reads.pdf"
+        params:
+            targets=intList,
+            labels = " ".join(samples)
+        log:
+            err="customs_stats/logs/on_target_stats.all_reads.err"
+            out="customs_stats/logs/on_target_stats.all_reads.out"
+        threads: nthreads
+        shell:"""
+            plotEnrichment -p {threads} \
+                   -b {input.bams} \
+                   --plotFile {output.plot}\
+                   --BED {params.targets} \
+                   --labels {params.labels} \
+                   --plotTitle 'Fraction of reads in target regions' \
+                   --outRawCounts {output.tab} \
+                   --variableScales
+                   --minMappingQuality 0 1> {log.out} 2> {log.err}
+            """
+
+rule on_target_rate_mapq:
+        input:
+            bams=expand("bams/{sample}.PCRrm.bam",sample=samples)
+        output:
+            tab="custom_stats/on_target_stats.mapq20.txt",
+            plot="custom_stats/on_target_stats.mapq20.pdf"
+        params:
+            targets=intList,
+            labels = " ".join(samples)
+        log:
+            err="customs_stats/logs/on_target_stats.mapq20.err"
+            out="customs_stats/logs/on_target_stats.mapq20.out"
+        threads: nthreads
+        shell:"""
+            plotEnrichment -p {threads} \
+                   -b {input.bams} \
+                   --plotFile {output.plot}\
+                   --BED {params.targets} \
+                   --labels {params.labels} \
+                   --plotTitle 'Fraction of reads in target regions' \
+                   --outRawCounts {output.tab} \
+                   --variableScales
+                   --minMappingQuality 20 1> {log.out} 2> {log.err}
+            """
+
