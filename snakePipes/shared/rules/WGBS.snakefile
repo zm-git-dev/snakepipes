@@ -816,7 +816,7 @@ rule methyl_extract_custom:
 
 rule per_base_cov_custom:
     input:
-        bams="bams/{sample}.PCRrm.bam",
+        bams=expand("bams/{sample}.PCRrm.bam",sample=samples)
     output:
         "cutoms_stats/coverage_per_base.targets.bed"
     params:
