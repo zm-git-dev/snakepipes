@@ -909,6 +909,6 @@ rule mean_target_coverage:
         cat <(cat {input} | head -n1 | awk '{{OFS="\t";$2="start\tend";print $0}}') \
             <(bedtools map -a {params.targets} -b <(cat {input} | \
               awk '{{OFS="\t";$2=$2-1"\t"$2; print $0}}') \
-            -c $(cat {input | awk '{{}}END{{for (i=4;i<=NF;i++){{printf i","}}; print NF+1}}') \
+            -c $(cat {input} | awk '{{}}END{{for (i=4;i<=NF;i++){{printf i","}}; print NF+1}}') \
             -o mean -prec 4) > {output} 2>{log.err}
         """
