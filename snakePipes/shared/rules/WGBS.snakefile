@@ -813,10 +813,18 @@ rule on_target_reads_region:
             multiBamSummary BED-file \
                 -b {input.bams} \
                 --BED {params.targets} \
-                --outRawCounts {output.tabq20} \
+                --outRawCounts tmp.q20.tsv \
                 --minMappingQuality 20 \
                 --labels {params.labels} \
                 -p {threads} 1> {log.out} 2> {log.err};
+            sort -k1,1 -k2,2n tmp.q20.tsv > {output.tabq20}; rm tmp.q20.tsv; 
+            multiBamSummary BED-file \
+                -b {input.bams} \
+                --BED {params.targets} \
+                --outRawCounts tmp.tsv \
+                --labels {params.labels} \
+                -p {threads} 1>> {log.out} 2>> {log.err};
+            sort -k1,1 -k2,2n tmp.tsv > {output.tab}; rm tmp.tsv;
             """
 
 rule methyl_extract_custom:
