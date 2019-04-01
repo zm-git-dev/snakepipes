@@ -878,7 +878,7 @@ rule target_cpgs:
         err="custom_stats/logs/targets.CpG.err"
     conda: CONDA_WGBS_ENV
     shell:"""
-        bedtools intersect -a <(cat {params.targets} | awk '{OFS="\t";$2=$2-1;$3=$3+2; print$0}') -b {input} -wo | awk '{OFS="\t"; print $4,$5,$6,$1"_"$2,0,$7,$8}' > {output} 2>{log.err}
+        bedtools intersect -a <(cat {params.targets} | awk '{OFS="\t";$2=$2-1;$3=$3+2; print $0}') -b {input} -wo | awk '{OFS="\t"; print $4,$5,$6,$1"_"$2,0,$7,$8}' > {output} 2>{log.err}
     """
 
 rule target_cpg_coverage:
