@@ -864,7 +864,7 @@ rule per_base_cov_custom:
         err="custom_stats/logs/coverage_per_base.targets.err",
         out="custom_stats/logs/coverage_per_base.targets.out"
     shell:"""
-        cat <(echo -e 'chr\tpos\t'$(echo '{input.bams}' | tr ' ' '\n' | sed 's/.*\///' | sed 's/.PCRrm.bam//g' | tr '\n' '\t')) <(samtools depth -a -q 20 -Q 20 {input.bams} -b {params.targets} ) > {output} 2>{log.err}
+        cat <(echo -e 'chr\tpos\t'$(echo '{input.bams}' | tr ' ' '\n' | sed 's/.*\///' | sed 's/.PCRrm.bam//g' | tr '\n' '\t')) <(samtools depth -a -q 20 -Q 20 {input.bams} -b <(cat {params.targets} | awk '{{OFS="\t";print $1,$2-1,$3-1}}') ) > {output} 2>{log.err}
         """
 
 rule target_cpgs:
