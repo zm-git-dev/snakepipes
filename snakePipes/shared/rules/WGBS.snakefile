@@ -846,7 +846,7 @@ rule methyl_extract_custom:
         conda: CONDA_WGBS_ENV
         shell: """
             MethylDackel extract -o {params.OUTpfx} -l {params.targets} \
-                -q 20 -p 20 --minDepth 1 --mergeContext -@ {threads} \
+                -q 20 -p 20 --minDepth 10 --mergeContext -@ {threads} \
                 {input.refG} {input.rmDupbam} 1>{log.out} 2>{log.err};
             bedtools map -a {params.targets} -b {output.methTab} \
                 -c 4 -o mean -prec 4 > {output.meanTab} 2>>{log.err}
@@ -917,7 +917,9 @@ rule mean_methyl_per_region:
     input:
         tsv=expand("custom_stats/{sample}.mean_methyl_per_region.tsv",sample=samples),
         tab="custom_stats/on_target_stats.per_region.mapq20.tsv",
-        cpg=expand("custom_stats/{sample}_CpG.bedGraph",sample=samples)
+        meth=expand("custom_stats/{sample}_CpG.bedGraph",sample=samples),
+        cpgs="custom_stats/targets.CpG.bed"
+        
     output:
         "custom_stats/mean_methyl_per_region.tsv"
     params:
@@ -930,3 +932,5 @@ rule mean_methyl_per_region:
     shell:"""
             Rscript {params.script} {params.indir} {output} 2> {log.err}
         """
+
+#sambamba depth base ../bams/*.PCRrm.bam -L /data_BSpipe/datasets/target_regions/targets.bed -z -m --min-base-quality 20 -F='mapping_quality>20' -t 20
