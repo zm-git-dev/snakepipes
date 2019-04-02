@@ -849,7 +849,7 @@ rule methyl_extract_custom:
                 -q 20 -p 20 --minDepth 1 --mergeContext -@ {threads} \
                 {input.refG} {input.rmDupbam} 1>{log.out} 2>{log.err};
             bedtools map -a {params.targets} -b {output.methTab} \
-                -c 4 -o mean > {output.meanTab} 2>>{log.err}
+                -c 4 -o mean -prec 4 > {output.meanTab} 2>>{log.err}
             """
 
 rule per_base_cov_custom:
@@ -899,7 +899,7 @@ rule mean_target_coverage:
     input:
         "custom_stats/coverage_per_base.targets.bed"
     output:
-        "custom_stats/mean_coverage_per_base.targets.bed"
+        "custom_stats/mean_coverage_per_region.bed"
     params:
         targets=intList
     log:
@@ -910,7 +910,7 @@ rule mean_target_coverage:
             <(bedtools map -a {params.targets} -b <(cat {input} | \
               awk '{{OFS="\t";$2=$2-1"\t"$2; print $0}}') \
             -c $(cat {input} | awk '{{}}END{{for (i=4;i<=NF;i++){{printf i","}}; print NF+1}}') \
-            -o mean -prec 4) > {output} 2>{log.err}
+            -o mean -prec 5) > {output} 2>{log.err}
         """
 
 rule mean_methyl_per_region:
