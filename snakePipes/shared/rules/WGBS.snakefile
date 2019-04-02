@@ -846,7 +846,7 @@ rule methyl_extract_custom:
         conda: CONDA_WGBS_ENV
         shell: """
             MethylDackel extract -o {params.OUTpfx} -l {params.targets} \
-                -q 20 -p 20 --minDepth 10 --mergeContext -@ {threads} \
+                -q 20 -p 20 --minDepth 1 --mergeContext -@ {threads} \
                 {input.refG} {input.rmDupbam} 1>{log.out} 2>{log.err};
             bedtools map -a {params.targets} -b {output.methTab} \
                 -c 4 -o mean -prec 4 > {output.meanTab} 2>>{log.err}
