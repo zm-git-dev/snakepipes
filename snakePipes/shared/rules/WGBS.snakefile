@@ -899,7 +899,7 @@ rule mean_target_coverage:
     input:
         "custom_stats/coverage_per_base.targets.bed"
     output:
-        "custom_stats/mean_coverage_per_region.bed"
+        "custom_stats/mean_coverage_per_base.targets.bed"
     params:
         targets=intList
     log:
@@ -916,7 +916,8 @@ rule mean_target_coverage:
 rule mean_methyl_per_region:
     input:
         tsv=expand("custom_stats/{sample}.mean_methyl_per_region.tsv",sample=samples),
-        tab="custom_stats/on_target_stats.per_region.mapq20.tsv"
+        tab="custom_stats/on_target_stats.per_region.mapq20.tsv",
+        cpg=expand("custom_stats/{sample}_CpG.bedGraph",sample=samples)
     output:
         "custom_stats/mean_methyl_per_region.tsv"
     params:
