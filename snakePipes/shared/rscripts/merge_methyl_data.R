@@ -18,3 +18,16 @@ for (f in files){
 }
 
 write.table(all,file = outFile, quote = F,row.names = F,col.names = T,sep = "\t")
+
+dat = read.table(paste0(FilePath,"/on_target_stats.per_region.mapq20.tsv"),header = T,comment.char = "")
+dat_mod = apply(dat[,-c(1:3)],2,function(x){x/sum(x)})
+final= cbind(dat[,1:3],dat_mod)
+
+write.table(all,file = "custom_stats/on_target_stats.per_region.mapq20.perc.tsv", quote = F,row.names = F,col.names = T,sep = "\t")
+
+dat = read.table(paste0(FilePath,"/on_target_stats.per_region.tsv"),header = T,comment.char = "")
+dat_mod = apply(dat[,-c(1:3)],2,function(x){x/sum(x)})
+final= cbind(dat[,1:3],dat_mod)
+
+write.table(all,file = "custom_stats/on_target_stats.per_region.perc.tsv", quote = F,row.names = F,col.names = T,sep = "\t")
+
