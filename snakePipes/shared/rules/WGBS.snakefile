@@ -915,7 +915,8 @@ rule mean_target_coverage:
 
 rule mean_methyl_per_region:
     input:
-        expand("custom_stats/{sample}.mean_methyl_per_region.tsv",sample=samples)
+        tsv=expand("custom_stats/{sample}.mean_methyl_per_region.tsv",sample=samples),
+        tab="custom_stats/on_target_stats.per_region.mapq20.tsv"
     output:
         "custom_stats/mean_methyl_per_region.tsv"
     params:
