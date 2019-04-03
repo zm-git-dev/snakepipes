@@ -25,7 +25,6 @@ def set_env_yamls():
             'CONDA_ATAC_ENV': 'envs/atac_seq.yaml',
             'CONDA_HIC_ENV': 'envs/hic.yaml',
             'CONDA_WGBS_ENV': 'envs/wgbs.yaml',
-            'CONDA_PY27_ENV': 'envs/python27.yaml',
             'CONDA_RMD_ENV': 'envs/rmarkdown.yaml'}
 
 
@@ -49,7 +48,7 @@ def sanity_dict_clean(myDict):
 
 def load_configfile(configfile, verbose, info='Config'):
     with open(configfile, "r") as f:
-        config = yaml.load(f)
+        config = yaml.load(f, Loader=yaml.FullLoader)
 
     config = sanity_dict_clean(config)
 
