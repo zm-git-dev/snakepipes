@@ -1,0 +1,8 @@
+name: snakepipes_createindices_environment_1.0
+channels:
+ - conda-forge
+ - bioconda
+dependencies:
+ - ucsc-fatotwobit
+ - ucsc-gtftogenepred
+ - ucsc-genepredtobed

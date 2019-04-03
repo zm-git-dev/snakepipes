@@ -1,0 +1,93 @@
+#!/usr/bin/env python3
+
+__description__ = """
+MPI-IE workflow for ATAC-seq Analysis
+
+usage example:
+    ATAC-seq -d working-dir mm10
+"""
+
+import argparse
+import os
+import sys
+import textwrap
+import snakePipes.common_functions as cf
+import snakePipes.parserCommon as parserCommon
+
+
+def parse_args(defaults={"verbose": False, "configfile": None, "cluster_configfile": None, "max_jobs": 5, "snakemake_options": "--use-conda", "tempdir": None,
+                         "fragmentSize_cutoff": 150, "fromBam": "" ,"qval": 0.001 ,"sampleSheet": None}):
+    """
+    Parse arguments from the command line.
+    """
+    mainArgs = parserCommon.mainArguments(defaults, workingDir=True)
+
+    parser = argparse.ArgumentParser(
+        prog=sys.argv[0],
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=textwrap.dedent(__description__),
+        parents=[mainArgs],
+        add_help=False
+    )
+
+    # Workflow options
+    optional = parser.add_argument_group('Options')
+    optional.add_argument("--fragmentSize-cutoff",
+                          dest="fragmentSize_cutoff",
+                          metavar="INT",
+                          help="Size threshold for filtering of nucleosomal fragments(default: '%(default)s')",
+                          type=int,
+                          default=defaults['fragmentSize_cutoff'])
+
+
+    optional.add_argument("--qval",
+                          dest="qval",
+                          metavar="INT",
+                          help="qvalue threshold for MACS2(default: '%(default)s')",
+                          type=int,
+                          default=defaults['qval'])
+
+
+    optional.add_argument("--sampleSheet",
+                          dest="sampleSheet",
+                          help="Invoke differential accessibility analysis by providing information on samples; see 'docs/content/sampleSheet.example.tsv' for example. IMPORTANT: The first entry defines which group of samples are control. With this, the order of comparison and likewise the sign of values can be changed! Also, the condition `control` should not be used (reserved to mark input samples in the ChIP-Seq workflow (default: '%(default)s').",
+                          default=defaults["sampleSheet"])
+
+    optional.add_argument("--fromBam",
+                         dest="fromBam",
+                         help=argparse.SUPPRESS,
+                         default=defaults["fromBam"])
+    optional.add_argument("--fromBamExt",
+                         dest="bam_ext",
+                         help=argparse.SUPPRESS,
+                         default=defaults["bam_ext"])
+
+    return parser
+
+
+def main():
+    baseDir, workflowDir, defaults = cf.setDefaults(os.path.basename(__file__))
+
+    # get command line arguments
+    parser = parse_args(defaults)
+    args = parser.parse_args()
+    args, defaults = cf.handleUserArgs(args, defaults, parse_args)
+
+    # we also add these paths to config, although we don't use them in the Snakefile
+    args.baseDir = baseDir
+
+    # Common arguments
+    cf.checkCommonArguments(args, baseDir)
+
+    # Handle YAML and log files
+    snakemake_cmd = cf.commonYAMLandLogs(baseDir, workflowDir, defaults, args, __file__)
+    snakemake_exports, logfile_name, temp_path = cf.logAndExport(args, os.path.basename(__file__))
+
+    cmd = " ".join(snakemake_exports + snakemake_cmd)
+
+    # Run everything
+    cf.runAndCleanup(args, cmd, logfile_name, temp_path)
+
+
+if __name__ == "__main__":
+    main()

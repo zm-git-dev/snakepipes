@@ -1,0 +1,9 @@
+name: hic_conda_env_1.0
+channels:
+ - conda-forge
+ - bioconda
+dependencies:
+ - hicexplorer = 2.2.3
+ - bwa = 0.7.17
+ - samtools = 1.9
+ - python-dateutil = 2.8.0

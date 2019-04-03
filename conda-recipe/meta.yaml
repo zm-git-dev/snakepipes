@@ -1,0 +1,30 @@
+package:
+  name: snakepipes
+  version: 1.2.0
+
+source:
+  path: ../
+
+build:
+  number: 0
+  noarch: python
+
+requirements:
+  build:
+    - python >=3
+  run:
+    - python >=3
+    - snakemake >=5.2.3
+    - pandas
+    - graphviz
+    - fuzzywuzzy
+    - wget
+
+test:
+  commands:
+    - DNA-mapping --help
+
+about:
+  home: 'https://snakepipes.readthedocs.org'
+  license: GPL3
+  summary: NGS processing pipelines from the MPI-IE

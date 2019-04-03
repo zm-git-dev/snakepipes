@@ -1,0 +1,9 @@
+name: snakepipes_chip-seq_1.0
+channels:
+ - conda-forge
+ - bioconda
+dependencies:
+ - samtools = 1.9
+ - macs2 = 2.1.2  #python 2
+ - tabix = 0.2.6
+ - r-histonehmm = 1.7
