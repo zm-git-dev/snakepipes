@@ -30,7 +30,7 @@ if paired:
             control_param =
                 lambda wildcards: "-c filtered_bam/"+get_control(wildcards.chip_sample)+".filtered.bam" if get_control(wildcards.chip_sample)
                 else "",
-            bampe = lambda wildcards: TRUE if bamPE is True else []
+            #bampe = lambda wildcards: TRUE if bamPE is True else []
         log:
             out = "MACS2/logs/MACS2.{chip_sample}.BAM.filtered.out",
             err = "MACS2/logs/MACS2.{chip_sample}.BAM.filtered.err"
@@ -65,7 +65,7 @@ if paired:
             control_param =
                 lambda wildcards: "-c filtered_bam/"+get_control(wildcards.chip_sample)+".filtered.bam" if get_control(wildcards.chip_sample)
                 else "",
-            bampe = lambda wildcards: TRUE if bamPE is True else []
+            #bampe = lambda wildcards: TRUE if bamPE is True else []
         log:
             out = "MACS2/logs/MACS2.{chip_sample}.BAMPE.filtered.out",
             err = "MACS2/logs/MACS2.{chip_sample}.BAMPE.filtered.err"

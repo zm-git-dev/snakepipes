@@ -8,6 +8,8 @@ bamCoverage:
     memory: 5G
 bamCoverage_unique_mappings:
     memory: 5G
+bamCoverage_unique_mappings_RPKM:
+    memory: 5G
 bamCoverage_RPKM:
     memory: 5G
 bamCoverage_filtered:

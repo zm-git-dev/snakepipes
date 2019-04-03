@@ -40,7 +40,7 @@ rule bamCoverage_filtered:
                          else "--extendReads {}".format(fragment_length),
         blacklist = "--blackListFileName {}".format(blacklist_bed) if blacklist_bed
                     else "",
-        add_read_filter = deepTools_bam_filter
+        add_read_filter = str(deepTools_bam_filter or '')
     log:
         out = "bamCoverage/logs/bamCoverage.{sample}.filtered.out",
         err = "bamCoverage/logs/bamCoverage.{sample}.filtered.err"

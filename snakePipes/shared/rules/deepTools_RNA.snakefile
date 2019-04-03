@@ -17,6 +17,27 @@ rule bamCoverage_unique_mappings:
     threads: 8
     shell: bamcov_unique_cmd
 
+rule bamCoverage_unique_mappings_RPKM:
+    input:
+        bam = mapping_prg+"/{sample}.bam",
+        bai = mapping_prg+"/{sample}.bam.bai"
+    output:
+        bw_fwd = "bamCoverage/{sample}.uniqueMappingsRPKM.fwd.bw",
+        bw_rev = "bamCoverage/{sample}.uniqueMappingsRPKM.rev.bw",
+    conda:
+        CONDA_SHARED_ENV
+    params:
+        bw_binsize = bw_binsize
+    log:
+        out="bamCoverage/logs/bamCoverage_uniqueMappingsRPKM.{sample}.out",
+        err="bamCoverage/logs/bamCoverage_uniqueMappingsRPKM.{sample}.err"
+    benchmark:
+        "bamCoverage/.benchmark/bamCoverage_uniqueMappingsRPKM.{sample}.benchmark"
+    threads: 8
+    shell: bamcov_unique_RPKM_cmd
+
+
+
 
 rule bamCoverage_RPKM:
     input:

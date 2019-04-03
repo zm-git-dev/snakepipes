@@ -14,7 +14,7 @@ rule bamCompare_subtract:
         ignoreForNorm = "--ignoreForNormalization {}".format(ignore_forNorm) if ignore_forNorm else "",
         read_extension = "--extendReads" if paired else "--extendReads {}".format(fragment_length),
         blacklist = "--blackListFileName {}".format(blacklist_bed) if blacklist_bed else "",
-        add_read_filter = deepTools_bam_filter
+        add_read_filter = str(deepTools_bam_filter or '')
     log:
         out = "deepTools_ChIP/logs/bamCompare.subtract.{chip_sample}.filtered.subtract.{control_name}.out",
         err = "deepTools_ChIP/logs/bamCompare.subtract.{chip_sample}.filtered.subtract.{control_name}.err"
@@ -38,7 +38,7 @@ rule bamCompare_log2:
         ignoreForNorm = "--ignoreForNormalization {}".format(ignore_forNorm) if ignore_forNorm else "",
         read_extension = "--extendReads" if paired else "--extendReads {}".format(fragment_length),
         blacklist = "--blackListFileName {}".format(blacklist_bed) if blacklist_bed else "",
-        add_read_filter = deepTools_bam_filter
+        add_read_filter = str(deepTools_bam_filter or '')
     log:
         out = "deepTools_ChIP/logs/bamCompare.log2ratio.{chip_sample}.{control_name}.filtered.out",
         err = "deepTools_ChIP/logs/bamCompare.log2ratio.{chip_sample}.{control_name}.filtered.err"
