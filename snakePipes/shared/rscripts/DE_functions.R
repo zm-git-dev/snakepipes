@@ -83,7 +83,7 @@ DESeq_basic <- function(countdata, coldata, fdr, alleleSpecific = FALSE, from_sa
     d<-as.formula(noquote(paste0("~",paste(cnames.sub,collapse="+"))))
     
     # Normal DESeq
-    print("Performing basic DESeq: test vs control")
+    print(paste("Performing DESeq: ",d))
     if(isTRUE(from_salmon)) {
       print("Using input from tximport")
         dds <- DESeq2::DESeqDataSetFromTximport(countdata,
