@@ -52,7 +52,6 @@ if allele_info == 'FALSE':
 if sampleSheet:
     include: os.path.join(maindir, "shared", "rules", "CSAW.snakefile")
 
-
 def run_peakCalling(allele_info,peakCallingMode):
     file_list = []
     if "macs2BAM" in peakCallingMode or "all" in peakCallingMode:
@@ -64,7 +63,6 @@ def run_peakCalling(allele_info,peakCallingMode):
     ## run histoneHMM broad enrichment calling only for samples annotated as *broad*
     if ("histoneHMM" in peakCallingMode or "all" in peakCallingMode) and allele_info == False:
          file_list.append([expand("histoneHMM/{chip_sample}.filtered.histoneHMM-regions.gff.gz", chip_sample = [s for s in chip_samples if is_broad(s)])])
-    
     return(file_list)
     
 def run_deepTools_qc(fromBam):
@@ -112,7 +110,7 @@ def run_deepTools_allelic():
 
 def run_CSAW():
     if sampleSheet:
-        return( ["CSAW/CSAW.session_info.txt"] )
+        return( ["CSAW_{}/CSAW.session_info.txt".format(sample_name)] )
     else:
         return([])
     

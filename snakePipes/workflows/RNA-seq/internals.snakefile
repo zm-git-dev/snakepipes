@@ -33,9 +33,6 @@ if not fromBam:
     samples = cf.get_sample_names(infiles,ext,reads)
 
     paired = cf.is_paired(infiles,ext,reads)
-
-    if not paired:
-        reads = [""]
 else:
     infiles = sorted(glob.glob(os.path.join(str(indir or ''), '*'+bam_ext)))
     samples = cf.get_sample_names_bam(infiles,bam_ext)
@@ -45,4 +42,4 @@ if sampleSheet:
     cf.check_sample_info_header(sampleSheet)
 
 if sampleSheet and not cf.check_replicates(sampleSheet):
-    print("\nWarning! Sleuth cannot be invoked without replicates! Only DESeq2 is used...\n")
+    sys.stderr.write("\nWarning! Sleuth cannot be invoked without replicates! Only DESeq2 is used...\n")

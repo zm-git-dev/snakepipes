@@ -113,11 +113,14 @@ def run_FastQC(fastqc):
 
 
 def run_Trimming(trim, fastqc):
+    readsUse = reads
+    if not paired:
+        readsUse = [reads[0]]
     if trim and fastqc:
-        return( expand(fastq_dir+"/{sample}{read}.fastq.gz", sample = samples, read = reads) +
-                expand("FastQC_trimmed/{sample}{read}_fastqc.html", sample = samples, read = reads) )
+        return( expand(fastq_dir+"/{sample}{read}.fastq.gz", sample = samples, read = readsUse) +
+                expand("FastQC_trimmed/{sample}{read}_fastqc.html", sample = samples, read = readsUse) )
     elif trim:
-        return( expand(fastq_dir+"/{sample}{read}.fastq.gz", sample = samples, read = reads) )
+        return( expand(fastq_dir+"/{sample}{read}.fastq.gz", sample = samples, read = readsUse) )
     else:
         return([])
 
@@ -138,8 +141,8 @@ def run_alignment_free():
         if sampleSheet:
             sample_name = os.path.splitext(os.path.basename(sampleSheet))[0]
             file_list.append( ["DESeq2_Salmon_{}/DESeq2.session_info.txt".format(sample_name)])
-        if sampleSheet and check_replicates(sampleSheet):
-            file_list.append( ["sleuth/so.rds"] )
+        if sampleSheet and cf.check_replicates(sampleSheet):
+            file_list.append( ["sleuth_Salmon_{}/so.rds".format(sample_name)] )
 
         return(file_list)
     else:
