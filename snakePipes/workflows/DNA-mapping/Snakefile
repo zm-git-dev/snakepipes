@@ -154,7 +154,7 @@ def run_allelesp_mapping():
         return([])
 
 def run_UCSCTracks():
-    if UCSCTracksGenome is not None:
+    if UCSCTracks:
         file_list = [
             expand("bamCoverage/UCSC_tracks/{sample}.filtered.seq_depth_norm.UCSC_chroms.bw", sample = samples)
             ]
@@ -198,7 +198,8 @@ rule all:
         run_Qualimap(),
         make_nmasked_genome(),
         run_allelesp_mapping(),
-        "multiQC/multiqc_report.html"
+        "multiQC/multiqc_report.html",
+        run_UCSCTracks()
 
 
 ### execute after workflow finished ############################################

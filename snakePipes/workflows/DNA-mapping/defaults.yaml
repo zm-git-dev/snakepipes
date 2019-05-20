@@ -57,8 +57,9 @@ plot_format: png
 ## Median/mean fragment length, only relevant for single-end data (default: 200)
 fragment_length: 200
 qualimap: false
-UCSCTracksGenome:
+UCSCTracks: false
 verbose: false
+deepTools_bam_filter:
 ################################################################################
 # Call snakemake directly, i.e. without using the wrapper script:
 #

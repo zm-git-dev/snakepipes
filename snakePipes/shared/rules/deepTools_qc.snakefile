@@ -14,6 +14,7 @@ rule bamCoverage:
         read_extension = "--extendReads" if paired
                          else "--extendReads {}".format(fragment_length),
         blacklist = "--blackListFileName {}".format(blacklist_bed) if blacklist_bed else "",
+        add_read_filter = str(deepTools_bam_filter or '')
     log:
         out = "bamCoverage/logs/bamCoverage.{sample}.out",
         err = "bamCoverage/logs/bamCoverage.{sample}.err"
