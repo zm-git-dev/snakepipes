@@ -1,7 +1,7 @@
 rule bamCoverage_unique_mappings:
     input:
-        bam = mapping_prg+"/{sample}.bam",
-        bai = mapping_prg+"/{sample}.bam.bai"
+        bam = "filtered_bam/{sample}.filtered.bam",
+        bai = "filtered_bam/{sample}.filtered.bam.bai"
     output:
         bw_fwd = "bamCoverage/{sample}.uniqueMappings.fwd.bw",
         bw_rev = "bamCoverage/{sample}.uniqueMappings.rev.bw",
@@ -41,8 +41,8 @@ rule bamCoverage_unique_mappings_RPKM:
 
 rule bamCoverage_RPKM:
     input:
-        bam = mapping_prg+"/{sample}.bam",
-        bai = mapping_prg+"/{sample}.bam.bai"
+        bam = "filtered_bam/{sample}.filtered.bam",
+        bai = "filtered_bam/{sample}.filtered.bam.bai"
     output:
         "bamCoverage/{sample}.RPKM.bw"
     conda:
@@ -60,8 +60,8 @@ rule bamCoverage_RPKM:
 
 rule bamCoverage_raw:
     input:
-        bam = mapping_prg+"/{sample}.bam",
-        bai = mapping_prg+"/{sample}.bam.bai"
+        bam = "filtered_bam/{sample}.filtered.bam",
+        bai = "filtered_bam/{sample}.filtered.bam.bai"
     output:
         "bamCoverage/{sample}.coverage.bw"
     conda:
@@ -79,8 +79,8 @@ rule bamCoverage_raw:
 
 rule plotEnrichment:
     input:
-        bam = expand(mapping_prg+"/{sample}.bam", sample=samples),
-        bai = expand(mapping_prg+"/{sample}.bam.bai", sample=samples),
+        bam = expand("filtered_bam/{sample}.filtered.bam", sample=samples),
+        bai = expand("filtered_bam/{sample}.filtered.bam.bai", sample=samples),
         gtf = "Annotation/genes.filtered.gtf"
     output:
         "deepTools_qc/plotEnrichment/plotEnrichment.tsv",
@@ -131,7 +131,7 @@ rule plotCorr_bed_pearson:
         err="deepTools_qc/logs/plotCorrelation_pearson.err"
     benchmark:
         "deepTools_qc/.benchmark/plotCorrelation_pearson.benchmark"
-    params: 
+    params:
         plotcmd = "" if plot_format == 'None' else
             "--plotFile " + "deepTools_qc/plotCorrelation/correlation.pearson.bed_coverage.heatmap." + plot_format,
         title='genes'
@@ -151,7 +151,7 @@ rule plotCorr_bed_spearman:
         err="deepTools_qc/logs/plotCorrelation_spearman.err"
     benchmark:
         "deepTools_qc/.benchmark/plotCorrelation_spearman.benchmark"
-    params:        
+    params:
         plotcmd = "" if plot_format == 'None' else
             "--plotFile " + "deepTools_qc/plotCorrelation/correlation.spearman.bed_coverage.heatmap." + plot_format,
         title='genes'
@@ -171,7 +171,7 @@ rule plotPCA:
         err="deepTools_qc/logs/plotPCA.err",
     benchmark:
         "deepTools_qc/.benchmark/plotPCA.benchmark"
-    params: 
+    params:
         plotcmd = "" if plot_format == 'None' else
                 "--plotFile " + "deepTools_qc/plotPCA/PCA.bed_coverage." + plot_format,
         title='genes'
@@ -181,8 +181,8 @@ rule plotPCA:
 ########deepTools estimateReadFiltering#########################
 rule estimateReadFiltering:
     input:
-        bam = mapping_prg+"/{sample}.bam",
-        bai = mapping_prg+"/{sample}.bam.bai",
+        bam = "filtered_bam/{sample}.filtered.bam",
+        bai = "filtered_bam/{sample}.filtered.bam.bai",
     output:
         "deepTools_qc/estimateReadFiltering/{sample}_filtering_estimation.txt"
     log:
@@ -196,8 +196,8 @@ rule estimateReadFiltering:
 #######InsertSizeMetrics###############
 rule bamPE_fragment_size:
     input:
-        bams = expand(mapping_prg+"/{sample}.bam", sample=samples),
-        bais = expand(mapping_prg+"/{sample}.bam.bai", sample=samples)
+        bams = expand("filtered_bam/{sample}.filtered.bam", sample=samples),
+        bais = expand("filtered_bam/{sample}.filtered.bam.bai", sample=samples)
     output:
         "deepTools_qc/bamPEFragmentSize/fragmentSize.metric.tsv"
     params:

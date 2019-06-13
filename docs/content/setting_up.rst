@@ -8,7 +8,7 @@ Unlike many other pipelines, setting up snakePipes is easy! All you need is a *l
 Installing conda with python3
 -----------------------------
 
-Follow the instructions `here <https://conda.io/docs/user-guide/install/index.html>`__ to install either
+Follow the instructions `here <https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html>`__ to install either
 miniconda or anaconda. A minimal version (miniconda) is enough for snakePipes. Get the miniconda installer `here <https://conda.io/miniconda.html>`__.
 
 After installation, check your python path and version :
@@ -30,13 +30,15 @@ Next, install snakePipes.
 Installing snakePipes
 ---------------------
 
-The easiest way to install snakePipes is via our conda channel. The following command install snakePipes and also creates a conda virtual environment named ``snakePipes``, which you can then activate via ``source activate snakePipes``.
+The easiest way to install snakePipes is via our conda channel. The following command install snakePipes and also creates a conda virtual environment named ``snakePipes``, which you can then activate via ``conda activate snakePipes``.
 
 .. code:: bash
 
     conda create -n snakePipes -c mpi-ie -c bioconda -c conda-forge snakePipes
 
 This way, the software used within snakePipes do not conflict with the software pre-installed on your terminal or in your python environment.
+
+.. note:: This might take a few minutes depending on the access to conda channels.
 
 Development installation
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -53,22 +55,28 @@ Instead of providing the URL to ``pip``, you can also `clone <https://help.githu
 
 .. note:: Using the --user argument would install the program into ``~/.local/bin/``. So make sure to have it in your $PATH before executing any workflow.
 
-Snakemake and pandas are installed as requirements. Ensure you have everything working by testing these commands:
+
+Testing whether the installation went fine
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+After installation, you can activate the snakePipes environment via
+
+.. code:: bash
+
+    conda activate snakePipes
+
+In case you installed conda using the latest version of conda installers (eg. minicoda `4.5.*` or later), the `conda` command might not be available inside an environment. To enable this, export the path to conda/bin in your $PATH (or append the path manually in your `bashrc`)
+
+.. code:: bash
+
+    export PATH="/path/to/miniconda3/bin:$PATH"
+
+Snakemake and pandas are installed along with snakePipes as requirements. Ensure you have them working by testing these commands:
 
 .. code-block:: bash
 
     snakemake --help
     snakePipes --help
-
-
-Remove example organism YAML files
-----------------------------------
-
-There are a number of example organism YAML files (see the next section). You will likely want to remove these as follows:
-
-.. code:: bash
-
-    snakePipes flushOrganisms
 
 
 Inspect and modify the setup files
@@ -118,9 +126,6 @@ file on our GitHub repository. You can modify it to suite your needs.
 Here are the content of *defaults.yaml*::
 
     snakemake_options: '--use-conda --conda-prefix /data/general/scratch/conda_envs'
-    tempdir: /data/extended/
-
-The ``tempdir`` path should be changed to a suitable directory that can hold the temporary files during pipeline execution.
 
 .. note::
 
@@ -200,7 +205,8 @@ Configure your cluster
 The ``cluster.yaml`` file contains both the default memory requirements as well as two options passed to snakemake that control how jobs are submitted to the cluster and files are retrieved::
 
     snakemake_latency_wait: 300
-    snakemake_cluster_cmd: module load slurm; SlurmEasy --mem-per-cpu {cluster.memory} --threads {threads} --log
+    snakemake_cluster_cmd: module load slurm; SlurmEasy --mem-per-cpu {cluster.memory} --threads {threads} --log {snakePipes_cluster_logDir} --name {rule}.snakemake 
+    snakePipes_cluster_logDir: cluster_logs
     __default__:
         memory: 8G
     snp_split:
@@ -208,7 +214,43 @@ The ``cluster.yaml`` file contains both the default memory requirements as well 
 
 If you have cloned the repository locally, the file is located under ``snakePipes/shared/``.
 
-You can change the default per-core memory allocation if needed here. Importantly, the ``snakemake_cluster_cmd`` option must be changed to match your needs. Whatever command you specify must include a ``{cluster.memory}`` option and a ``{threads}`` option. You can specify other required options here as well. The ``snakemake_latency_wait`` value defines how long snakemake should wait for files to appear before throwing an error. The default of 300 seconds is typically reasonable when a file system such as `NFS <https://en.wikipedia.org/wiki/Network_File_System>`__ is in use.
+You can change the default per-core memory allocation if needed here. Importantly, the ``snakemake_cluster_cmd`` 
+option must be changed to match your needs (see table below). Whatever command you specify must include 
+a ``{cluster.memory}`` option and a ``{threads}`` option. You can specify other required options here as well. 
+The ``snakemake_latency_wait`` value defines how long snakemake should wait for files to appear 
+before throwing an error. The default of 300 seconds is typically reasonable when a file system such as 
+`NFS <https://en.wikipedia.org/wiki/Network_File_System>`__ is in use. Please also note that there are additional memory 
+settings for each workflow in ``snakePipes/workflows/[workflow]/cluster.yaml`` that you might need to adjust. 
+
+``snakePipes_cluster_logDir:`` can be used like a wildcard in `snakemake_cluster_cmd` to specify the directory 
+for the stdout and stderr files from a job that is running on the cluster. This is given separate to make sure 
+the directory exists before execution. A relative path is treated relative to the ouput directory of the workflow. 
+If you want, you can also give an absolute log directory starting with /.
+
+==================== ======================================================================================
+ Scheduler/Queuing        snakemake_cluster_cmd example                                                                                                    
+==================== ======================================================================================
+ **slurm**            .. code:: bash                                                                                       
+                                          
+                        snakemake_cluster_cmd: module load slurm; sbatch --ntasks-per-node=1 
+                           -c {threads} -J {rule}.snakemake --mem-per-cpu={cluster.memory} 
+                           -p MYQUEUE -o {snakePipes_cluster_logDir}/{rule}.%j.out 
+                           -e {snakePipes_cluster_logDir}/{rule}.%j.err
+                        snakePipes_cluster_logDir: cluster_logs
+                        
+ **PBS/Torque**       .. code:: bash                                                                                       
+                                          
+                        snakemake_cluster_cmd: qsub -N {rule}.snakemake
+                           -q MYQUEUE -l pmem={cluster.memory} 
+                           -l walltime=20:00:00 -l nodes=1:ppn={cluster.threads} 
+                           -o {snakePipes_cluster_logDir}/{rule}.\$PBS_JOBID.out 
+                           -e {snakePipes_cluster_logDir}/{rule}.\$PBS_JOBID.err
+                        snakePipes_cluster_logDir: cluster_logs        
+                        
+ **SGE**              *Please send us a working example!*                
+==================== ======================================================================================
+
+
 
 .. _workflowOpts:
 

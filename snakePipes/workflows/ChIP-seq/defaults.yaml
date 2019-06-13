@@ -41,6 +41,11 @@ fromBam:
 plot_format: png
 deepTools_bam_filter:
 peakCallingMode: macs2BAM
+##dummy string to skip filtering annotation
+filter_annotation:
+##parameters to filter DB regions on
+fdr: 0.05
+absBestLFC: 1
 ################################################################################
 # Call snakemake directly, i.e. without using the wrapper script:
 #

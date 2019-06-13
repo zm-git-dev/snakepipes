@@ -3,7 +3,7 @@
 
 rule featureCounts:
     input:
-        bam = mapping_prg+"/{sample}.bam",
+        bam = "filtered_bam/{sample}.filtered.bam",
         gtf = "Annotation/genes.filtered.gtf",
     output:
         "featureCounts/{sample}.counts.txt"
@@ -16,15 +16,18 @@ rule featureCounts:
         err = "featureCounts/{sample}.err"
     threads: 8
     conda: CONDA_RNASEQ_ENV
-    shell:
-        "featureCounts "
-        "{params.paired_opt}{params.opts} "
-        "-T {threads} "
-        "-s {params.libtype} "
-        "-a {input.gtf} "
-        "-o {output} "
-        "--tmpDir ${{TMPDIR}} "
-        "{input.bam} > {log.out} 2> {log.err}"
+    shell: """
+        MYTEMP=$(mktemp -d ${{TMPDIR:-/tmp}}/snakepipes.XXXXXXXXXX);
+        featureCounts  \
+        {params.paired_opt}{params.opts} \
+        -T {threads} \
+        -s {params.libtype} \
+        -a {input.gtf} \
+        -o {output} \
+        --tmpDir $MYTEMP \
+        {input.bam} > {log.out} 2> {log.err};
+        rm -rf $MYTEMP
+        """
 
 rule merge_featureCounts:
     input:

@@ -102,12 +102,6 @@ def mainArguments(defaults, workingDir=False, createIndices=False):
                          help="Snakemake options to be passed directly to snakemake, e.g. use --snakemake_options='--dryrun --rerun-incomplete --unlock --forceall'. WARNING! ONLY EXPERT USERS SHOULD CHANGE THIS! THE DEFAULT VALUE WILL BE APPENDED RATHER THAN OVERWRITTEN! (default: '%(default)s')",
                          default=[defaults["snakemake_options"]])
 
-    general.add_argument("--tempdir",
-                         dest="tempdir",
-                         type=str,
-                         help="used prefix path for temporary directory created via mktemp. Created temp dir gets exported as $TMPDIR and is removed at the end of this wrapper! (default: '%(default)s')",
-                         default=defaults["tempdir"])
-
     general.add_argument("--DAG",
                          dest="createDAG",
                          action="store_true",
@@ -220,6 +214,37 @@ def commonOptions(grp, defaults, bw=True, plots=True):
                      action="store_true",
                      help="Run FastQC read quality control (default: '%(default)s')",
                      default=defaults["fastqc"])
+
+    grp.add_argument("--umibc",
+                     dest="umibarcode",
+                     action="store_true",
+                     help="To extract umi barcode from fastq file."
+                     "(default: '%(default)s')",
+                     default=defaults["umibarcode"])
+
+    grp.add_argument("--bcpattern",
+                     dest="bcpattern",
+                     help="The pattern to be considered for the barcode."
+                     "(default: '%(default)s')",
+                     default=defaults["bcpattern"])
+
+    grp.add_argument("--umidedup",
+                     dest="umidedup",
+                     action="store_true",
+                     help="To run `umi_tools dedup`."
+                     "(default: '%(default)s')",
+                     default=defaults["umidedup"])
+
+    grp.add_argument("--umidedup_sep",
+                     help="umi separation character "
+                     "that will be passed to umi_tools."
+                     "(default: '%(default)s')",
+                     default=defaults["umidedup_sep"])
+
+    grp.add_argument("--umidedup_opts",
+                     help="Options that will be passed to umi_tools."
+                     "(default: '%(default)s')",
+                     default=defaults["umidedup_opts"])
 
     if bw:
         grp.add_argument("--bw-binsize",
