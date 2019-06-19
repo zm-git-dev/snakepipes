@@ -20,8 +20,9 @@ def parse_arguments(defaults):
                                      usage='$ convertChroms BIGWIG', formatter_class=RawTextHelpFormatter)
 
     parser.add_argument('bw_in_filename',
+                        nargs='+',
                         metavar='BIGWIG',
-                        help='bigwig file that will be converted')
+                        help='single bigwig file or list of files that will be converted')
 
     parser.add_argument('--genome', '-g',
                         action='store',
@@ -46,8 +47,9 @@ def parse_arguments(defaults):
 
     parser.add_argument('--outFileName', '-o',
                         action='store',
+                        nargs='*',
                         dest='bw_out_filename',
-                        help='Chr naming format of converted bigwig (ensembl|gencode|UCSC) (default: %(default)s)',
+                        help='Output filename (default: %(default)s)',
                         default=defaults["bw_out_filename"])
 
     parser.add_argument('--baseURL', '-u',
@@ -121,6 +123,7 @@ def convert_bigwig(mapping_table, bw_in_filename, bw_out_filename, verbose=False
 
     it checks which chromosome names that can correctly mapped, all other chromosomes are skipped
     """
+    print("\nstart bigwig conversion "+bw_in_filename+" --> " +bw_out_filename+"...")
     bw = pyBigWig.open(bw_in_filename)
     curr_chroms = bw.chroms()
 
@@ -137,7 +140,8 @@ def convert_bigwig(mapping_table, bw_in_filename, bw_out_filename, verbose=False
 
     if (len(new_chroms) <= 0):
         print("No chromosomes found for mapping! Wrong 'FROM_FORMAT'?")
-        sys.exit(1)
+        print("skip this file...")
+        return
 
     bw_out = pyBigWig.open(bw_out_filename, "w")
     bw_out.addHeader(list(new_chroms.items()))
@@ -153,7 +157,7 @@ def convert_bigwig(mapping_table, bw_in_filename, bw_out_filename, verbose=False
     bw.close()
 
     if (verbose):
-        print("\nbigwig conversion finished!\n")
+        print("\nbigwig conversion "+bw_in_filename+" --> " +bw_out_filename+" done!")
 
 
 def main(args=None):
@@ -168,15 +172,18 @@ def main(args=None):
     }
 
     args = parse_arguments(defaults).parse_args(args)
-
-    bw_out_filename = args.bw_out_filename
-    if args.bw_out_filename is None:
-        bw_out_filename = re.sub("(.[^.]+)$", ".%s\\1" % (args.to_format + "_chroms"), args.bw_in_filename)
-    print("\noutput_file: " + bw_out_filename)
-
+    
     mapping_table = get_chromosome_mapping(genome=args.genome, from_format=args.from_format, to_format=args.to_format, verbose=args.verbose, base_url=args.base_url)
-
-    convert_bigwig(mapping_table, args.bw_in_filename, bw_out_filename, args.verbose)
+    
+    for curr_file in args.bw_in_filename:
+        if args.bw_out_filename is not None and len(args.bw_out_filename) != args.bw_in_filename:
+            sys.exit("Please use same number of arguments for --outFileName/-o as well as you have input files!")
+        elif args.bw_out_filename is not None and len(args.bw_out_filename) == len(args.bw_in_filename):
+            bw_out_filename = args.bw_out_filename.index(curr_file)
+        else:
+            bw_out_filename = re.sub("(.[^.]+)$", ".%s\\1" % (args.to_format + "_chroms"), curr_file)
+         
+        convert_bigwig(mapping_table, curr_file, bw_out_filename, args.verbose)
 
 
 if __name__ == "__main__":
