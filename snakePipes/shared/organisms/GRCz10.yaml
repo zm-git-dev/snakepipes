@@ -1,5 +1,3 @@
-genome_build: GRCz10
-chromosome_naming: ensembl
 genome_size: 1371719383
 genome_fasta: "/data/repository/organisms/GRCz10_ensembl/genome_fasta/genome.fa"
 genome_index: "/data/repository/organisms/GRCz10_ensembl/genome_fasta/genome.fa.fai"

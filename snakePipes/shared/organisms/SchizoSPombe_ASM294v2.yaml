@@ -1,5 +1,3 @@
-genome_build: ASM294v2
-chromosome_naming: ensembl
 genome_size: 12631379
 genome_fasta: "/data/repository/organisms/SchizoSPombe_ASM294v2_ensembl/genome_fasta/genome.fa"
 genome_index: "/data/repository/organisms/SchizoSPombe_ASM294v2_ensembl/genome_fasta/genome.fa.fai"

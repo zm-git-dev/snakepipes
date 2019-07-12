@@ -1,5 +1,3 @@
-genome_build: BDGP6
-chromosome_naming: ensembl
 genome_size: 142573017
 genome_fasta: "/data/repository/organisms/dm6_ensembl/genome_fasta/genome.fa"
 genome_index: "/data/repository/organisms/dm6_ensembl/genome_fasta/genome.fa.fai"
