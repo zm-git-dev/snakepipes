@@ -51,29 +51,6 @@ rule bamCoverage_filtered:
     conda: CONDA_SHARED_ENV
     shell: bamcov_cmd
 
-# TODO: include blacklist!? use deeptools bam filtering options?
-
-rule bamCoverage_filtered_UCSC:
-    input:
-        "bamCoverage/{sample}.filtered.seq_depth_norm.bw"
-    output:
-        "bamCoverage/UCSC_tracks/{sample}.filtered.seq_depth_norm.UCSC_chroms.bw"
-    params:
-        fromFormat=chromosome_naming,
-        toFormat="UCSC",
-        genome=genome_build,
-        tool_path=os.path.join(maindir, "shared", "tools")
-    log:
-        out = "bamCoverage/logs/bamCoverage.{sample}.filtered.altTracks.out",
-        err = "bamCoverage/logs/bamCoverage.{sample}.filtered.altTracks.err"
-    threads: 1
-    conda: CONDA_SHARED_ENV
-    shell:"""
-    {params.tool_path}/convertChromsBigWig.py {input} --fromFormat {params.fromFormat} --toFormat {params.toFormat} --genome {params.genome} -o {output} -v 
-    """
-        
-
-
 
 ### deepTools plotCoverage #####################################################
 

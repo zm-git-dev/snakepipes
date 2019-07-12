@@ -85,11 +85,6 @@ def parse_args(defaults={"verbose": False, "configfile": None,
                                "(default: '%(default)s')",
                           default=defaults["window_size"])
 
-    optional.add_argument("--UCSCtracks",
-                          dest="UCSCTracks",
-                          action="store_true",
-                          help="Produce also UCSC conform bigwig tracks. Please provide the genome assembly corresponding to your selected genome config file! (eg. GRCh37, GRCm38, BDGP6)")
-
     optional.add_argument("--predict_chip_dict",
                           dest="predict_chip_dict",
                           nargs='?',

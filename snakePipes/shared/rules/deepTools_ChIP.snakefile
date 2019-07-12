@@ -47,47 +47,6 @@ rule bamCompare_log2:
     threads: 16
     conda: CONDA_SHARED_ENV
     shell: bamcompare_log2_cmd
-
-### Convert to UCSC tracks ###################################################
-
-rule bamCompare_UCSC_subtract:
-    input:
-        bw_subtract="deepTools_ChIP/bamCompare/{chip_sample}.filtered.subtract.{control_name}.bw"
-    output:
-        out_bw_subtract="deepTools_ChIP/bamCompare/UCSC_tracks/{chip_sample}.filtered.subtract.{control_name}.UCSC_chroms.bw"
-    params:
-        fromFormat=chromosome_naming,
-        toFormat="UCSC",
-        genome=genome_build,
-        tool_path=os.path.join(maindir, "shared", "tools")
-    log:
-        out = "deepTools_ChIP/logs/bamCompare.{chip_sample}.{control_name}.filtered.subtract.UCSCtracks.out",
-        err = "deepTools_ChIP/logs/bamCompare.{chip_sample}.{control_name}.filtered.subtract.UCSCtracks.err"
-    threads: 1
-    conda: CONDA_SHARED_ENV
-    shell:"""
-    {params.tool_path}/convertChromsBigWig.py {input.bw_subtract} --fromFormat {params.fromFormat} --toFormat {params.toFormat} --genome {params.genome} -o {output.out_bw_subtract} -v
-    """
-
-rule bamCompare_UCSC_log2:
-    input:
-        bw_log2="deepTools_ChIP/bamCompare/{chip_sample}.filtered.log2ratio.over_{control_name}.bw"
-    output:
-        out_bw_log2="deepTools_ChIP/bamCompare/UCSC_tracks/{chip_sample}.filtered.log2ratio.over_{control_name}.UCSC_chroms.bw"
-    params:
-        fromFormat=chromosome_naming,
-        toFormat="UCSC",
-        genome=genome_build,
-        tool_path=os.path.join(maindir, "shared", "tools")
-    log:
-        out = "deepTools_ChIP/logs/bamCompare.{chip_sample}.{control_name}.filtered.log2.UCSCtracks.out",
-        err = "deepTools_ChIP/logs/bamCompare.{chip_sample}.{control_name}.filtered.log2.UCSCtracks.err"
-    threads: 1
-    conda: CONDA_SHARED_ENV
-    shell:"""
-    {params.tool_path}/convertChromsBigWig.py {input.bw_log2} --fromFormat {params.fromFormat} --toFormat {params.toFormat} --genome {params.genome} -o {output.out_bw_log2} -v
-    """
-
         
 ### deepTools plotEnrichment ###################################################
 

@@ -121,24 +121,6 @@ def run_CSAW():
         return( file_list )
     else:
         return([])
-    
-def run_UCSCTracks():
-    if UCSCTracks:
-        file_list = []
-        for chip_sample in chip_samples_w_ctrl:
-            control_name = get_control_name(chip_sample)
-            if bigWigType == "subtract" or bigWigType == "both":
-                file_list.append([
-                    "deepTools_ChIP/bamCompare/UCSC_tracks/"+chip_sample+".filtered.subtract."+control_name+".UCSC_chroms.bw"])
-            if bigWigType == "log2ratio" or bigWigType == "both":
-                file_list.append([
-                    "deepTools_ChIP/bamCompare/UCSC_tracks/"+chip_sample+".filtered.log2ratio.over_"+control_name+".UCSC_chroms.bw"])
-        file_list.append([
-            expand("bamCoverage/UCSC_tracks/{sample}.filtered.seq_depth_norm.UCSC_chroms.bw", sample = samples)])
-        return(file_list)
-    else:
-        return([])
-
 
 ### execute before workflow starts #############################################
 ################################################################################
@@ -185,7 +167,6 @@ rule all:
         run_deepTools_allelic(),
         ## run csaw if asked for
         run_CSAW(),
-        run_UCSCTracks(),
         "QC_report/QC_report_all.tsv"
 
 ### execute after workflow finished ############################################

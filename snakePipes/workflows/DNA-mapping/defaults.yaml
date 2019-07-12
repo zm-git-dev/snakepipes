@@ -62,7 +62,6 @@ plot_format: png
 ## Median/mean fragment length, only relevant for single-end data (default: 200)
 fragment_length: 200
 qualimap: false
-UCSCTracks: false
 verbose: false
 deepTools_bam_filter:
 ################################################################################

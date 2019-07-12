@@ -27,7 +27,7 @@ def parse_args(defaults={"verbose": False, "configfile": None,
                          "plot_format": "png", "bowtie_opts": "",
                          "umidedup": False, "umidedup_opts": "",
                          "umidedup_sep": "_", "umibarcode": False,
-                         "bcpattern": "", "mate_orientation": "--fr", "UCSCTracks": False}):
+                         "bcpattern": "", "mate_orientation": "--fr"}):
     """
     Parse arguments from the command line.
     """
@@ -116,13 +116,6 @@ def parse_args(defaults={"verbose": False, "configfile": None,
                           "skipped if downsampling is specified "
                           "(default: '%(default)s')",
                           default=defaults["gcbias"])
-    
-    optional.add_argument("--UCSCtracks",
-                          dest="UCSCTracks",
-                          action="store_true",
-                          help="Produce also UCSC conform bigwig tracks.",
-                          default=defaults["UCSCTracks"])
-
 
     return parser
 
