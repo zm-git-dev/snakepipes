@@ -16,7 +16,8 @@ if umibarcode:
             conda: CONDA_SHARED_ENV
             shell:"""
                 umi_tools extract -I {input.r1} --read2-in={input.r2} \
-                --bc-pattern={params.bcpattern} --stdout={output.r1} \
+                --bc-pattern={params.bcpattern} --bc-pattern2={params.bcpattern}\
+                --stdout={output.r1} \
                 --read2-out={output.r2} -L {log.out} -E {log.err}
                 """
 
@@ -56,15 +57,16 @@ else:
 
 #If DNA-mapping:
 if umidedup:
-    rule filter_reads:
+    rule filter_reads_umi:
         input:
             bamfile = "filtered_bam/{sample}.filtered.tmp.bam" if mapping_prg == "Bowtie2" else mapping_prg+"/{sample}.bam",
             indexfile = "filtered_bam/{sample}.filtered.tmp.bam.bai" if mapping_prg == "Bowtie2" else mapping_prg+"/{sample}.bam.bai"
         output:
             bamfile = "filtered_bam/{sample}.filtered.bam"
         params:
-            umitools_options = str(umidedup_opts),
-            umi_sep = str(umidedup_sep),
+            umitools_options = str(umidedup_opts or ''),
+            umitools_paired = "--paired " if paired else " ",
+            umi_sep = str(umidedup_sep      ),
         log:
             out = "filtered_bam/logs/umi_dedup.{sample}.out",
             err = "filtered_bam/logs/umi_dedup.{sample}.err"
@@ -73,7 +75,7 @@ if umidedup:
             umi_tools dedup -I {input.bamfile} \
             -S {output.bamfile} -L {log.out} -E {log.err} \
             --umi-separator {params.umi_sep} \
-            {params.umitools_options}
+            {params.umitools_paired} {params.umitools_options}
             """
 else:
     rule filter_reads:
