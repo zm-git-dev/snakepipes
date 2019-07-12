@@ -13,7 +13,7 @@ def multiqc_input_check(return_value):
             if trim and fastqc:
                 infiles.append( expand("FastQC_trimmed/{sample}{read}_fastqc.html", sample = samples, read = reads) )
                 indir += " FastQC_trimmed "
-                infiles.append( expand(fastq_dir+"/{sample}{read}{ext}", sample = samples, read = reads, ext = ext) )
+                infiles.append( expand(fastq_dir+"/{sample}{read}.fastq.gz", sample = samples, read = reads) )
                 indir += fastq_dir + " "
             elif fastqc:
                 infiles.append( expand("FastQC/{sample}{read}_fastqc.html", sample = samples, read = reads) )
