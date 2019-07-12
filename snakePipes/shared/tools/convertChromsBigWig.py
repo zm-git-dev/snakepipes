@@ -78,7 +78,7 @@ def get_chromosome_mapping(genome="GRCm38", from_format="ensembl", to_format="UC
     mapping_file = genome + '_' + from_format + '2' + to_format + '.txt'
 
     if re.match('^file:[/]+.*', base_url):
-            base_url = re.sub("file:[/]*(/.*)", "\\1", base_url)
+        base_url = re.sub("file:[/]*(/.*)", "\\1", base_url)
 
     if verbose:
         print("load mapping table (" + mapping_file + ') from ' + base_url)
@@ -123,7 +123,7 @@ def convert_bigwig(mapping_table, bw_in_filename, bw_out_filename, verbose=False
 
     it checks which chromosome names that can correctly mapped, all other chromosomes are skipped
     """
-    print("\nstart bigwig conversion "+bw_in_filename+" --> " +bw_out_filename+"...")
+    print("\nstart bigwig conversion " + bw_in_filename + " --> " + bw_out_filename + "...")
     bw = pyBigWig.open(bw_in_filename)
     curr_chroms = bw.chroms()
 
@@ -157,7 +157,7 @@ def convert_bigwig(mapping_table, bw_in_filename, bw_out_filename, verbose=False
     bw.close()
 
     if (verbose):
-        print("\nbigwig conversion "+bw_in_filename+" --> " +bw_out_filename+" done!")
+        print("\nbigwig conversion " + bw_in_filename + " --> " + bw_out_filename + " done!")
 
 
 def main(args=None):
@@ -172,9 +172,9 @@ def main(args=None):
     }
 
     args = parse_arguments(defaults).parse_args(args)
-    
+
     mapping_table = get_chromosome_mapping(genome=args.genome, from_format=args.from_format, to_format=args.to_format, verbose=args.verbose, base_url=args.base_url)
-    
+
     for curr_file in args.bw_in_filename:
         if args.bw_out_filename is not None and len(args.bw_out_filename) != args.bw_in_filename:
             sys.exit("Please use same number of arguments for --outFileName/-o as well as you have input files!")
@@ -182,7 +182,7 @@ def main(args=None):
             bw_out_filename = args.bw_out_filename.index(curr_file)
         else:
             bw_out_filename = re.sub("(.[^.]+)$", ".%s\\1" % (args.to_format + "_chroms"), curr_file)
-         
+
         convert_bigwig(mapping_table, curr_file, bw_out_filename, args.verbose)
 
 
