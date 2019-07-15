@@ -58,6 +58,7 @@ if sampleSheet:
 
 def run_peakCalling(allele_info,peakCallingMode):
     file_list = []
+    print(peakCallingMode)
     if "macs2BAM" in peakCallingMode or "all" in peakCallingMode:
         file_list.append([expand("MACS2/{chip_sample}.filtered.BAM_peaks.xls", chip_sample = chip_samples)])
         file_list.append([expand("MACS2/{chip_sample}.filtered.BAM_peaks.qc.txt", chip_sample = chip_samples)])
@@ -66,7 +67,10 @@ def run_peakCalling(allele_info,peakCallingMode):
         file_list.append([expand("MACS2/{chip_sample}.filtered.BAMPE_peaks.xls", chip_sample = chip_samples)])
     ## run histoneHMM broad enrichment calling only for samples annotated as *broad*
     if ("histoneHMM" in peakCallingMode or "all" in peakCallingMode) and allele_info == False:
+         print("here")
          file_list.append([expand("histoneHMM/{chip_sample}.filtered.histoneHMM-regions.gff.gz", chip_sample = [s for s in chip_samples if is_broad(s)])])
+    else:
+        print("not")
     return(file_list)
     
 def run_deepTools_qc(fromBam):

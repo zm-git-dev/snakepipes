@@ -49,8 +49,9 @@ def parse_args(defaults={"verbose": False, "configfile": None,
 
     optional.add_argument("--peakCalling",
                           dest="peakCallingMode",
-                          help="Call peaks with different methods. Default: all Choices: all macs2BAM macs2BAMPE histoneHMM none",
-                          default="all",
+                          help="Call peaks with different methods. Note: histoneHMM is only done for broad marks, macs2BAMPE only done for paired-end data! "
+                          "(default: '%(default)s')",
+                          default=defaults["peakCallingMode"],
                           nargs="+",
                           choices=['all', 'macs2BAM', 'macs2BAMPE', 'histoneHMM', 'none'])
 
