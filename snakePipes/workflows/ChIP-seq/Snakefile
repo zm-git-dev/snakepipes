@@ -66,7 +66,7 @@ def run_peakCalling(allele_info,peakCallingMode):
     if "macs2BAMPE" in peakCallingMode or "all" in peakCallingMode:
         file_list.append([expand("MACS2/{chip_sample}.filtered.BAMPE_peaks.xls", chip_sample = chip_samples)])
     ## run histoneHMM broad enrichment calling only for samples annotated as *broad*
-    if ("histoneHMM" in peakCallingMode or "all" in peakCallingMode) and allele_info == False:
+    if "histoneHMM" in peakCallingMode or "all" in peakCallingMode:
          print("here")
          file_list.append([expand("histoneHMM/{chip_sample}.filtered.histoneHMM-regions.gff.gz", chip_sample = [s for s in chip_samples if is_broad(s)])])
     else:
