@@ -7,6 +7,7 @@ import re
 import argparse
 from argparse import RawTextHelpFormatter
 import itertools
+from tempfile import _text_openflags
 
 
 def parse_arguments(defaults):
@@ -116,6 +117,40 @@ def get_chromosome_mapping(genome="GRCm38", from_format="ensembl", to_format="UC
 
     return mapping_table
 
+def convert_tsv(mapping_table, text_in_filename, text_out_filename, verbose=False):
+    """
+    convert chromosome names of a bigwig file according to given mapping_table
+
+    it checks which chromosome names that can correctly mapped, all other chromosomes are skipped
+    """
+    print("\nstart tsv conversion " + text_in_filename + " --> " + text_out_filename + "...")
+    
+    matched_chroms = {}
+    chrom_field = 0
+    
+    with open(text_in_filename, 'r') as orig, open(text_out_filename, 'w') as out:
+        for line in orig:
+            fields = line.split("\t")
+            if fields[chrom_field] in mapping_table:
+                fields[chrom_field] = mapping_table[fields[chrom_field]]
+                out.write("\t".join(fields))
+                matched_chroms[fields[chrom_field]] = 1
+            else:
+                if fields[0] not in matched_chroms:
+                    matched_chroms[fields[chrom_field]] = 0
+                    
+    orig.close()
+    out.close()
+    
+    for i in matched_chroms:
+        if matched_chroms[i] == 1:
+            print(i + " --> OK")
+        else:
+            print(i + " --> Not mapped")
+
+    if (verbose):
+        print("\ntsv conversion " + text_in_filename + " --> " + text_out_filename + " done!")
+
 
 def convert_bigwig(mapping_table, bw_in_filename, bw_out_filename, verbose=False):
     """
@@ -175,6 +210,10 @@ def main(args=None):
 
     mapping_table = get_chromosome_mapping(genome=args.genome, from_format=args.from_format, to_format=args.to_format, verbose=args.verbose, base_url=args.base_url)
 
+    ## https://stackoverflow.com/questions/898669/how-can-i-detect-if-a-file-is-binary-non-text-in-python
+    textchars = bytearray({7,8,9,10,12,13,27} | set(range(0x20, 0x100)) - {0x7f})
+    is_binary_string = lambda bytes: bool(bytes.translate(None, textchars))
+
     for curr_file in args.bw_in_filename:
         if args.bw_out_filename is not None and len(args.bw_out_filename) != args.bw_in_filename:
             sys.exit("Please use same number of arguments for --outFileName/-o as well as you have input files!")
@@ -183,7 +222,10 @@ def main(args=None):
         else:
             bw_out_filename = re.sub("(.[^.]+)$", ".%s\\1" % (args.to_format + "_chroms"), curr_file)
 
-        convert_bigwig(mapping_table, curr_file, bw_out_filename, args.verbose)
+        if is_binary_string(open(curr_file, 'rb').read(1024)):
+            convert_bigwig(mapping_table, curr_file, bw_out_filename, args.verbose)
+        else:
+            convert_tsv(mapping_table, curr_file, bw_out_filename, args.verbose)
 
 
 if __name__ == "__main__":
