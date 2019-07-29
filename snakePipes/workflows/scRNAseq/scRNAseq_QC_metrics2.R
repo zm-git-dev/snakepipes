@@ -6,6 +6,8 @@
 
 ## call example: /package/R-3.3.1/bin/Rscript my_scRNA_path/ beta_cells_28wks.merged.coutt.tsv 1
 
+.libPaths(R.home("library"))
+
 require(ggplot2)
 require(dplyr)
 require(scales)
