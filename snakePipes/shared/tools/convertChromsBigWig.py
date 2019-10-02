@@ -7,7 +7,7 @@ import re
 import argparse
 from argparse import RawTextHelpFormatter
 import itertools
-from tempfile import _text_openflags
+import gzip
 
 
 def parse_arguments(defaults):
@@ -65,6 +65,13 @@ def parse_arguments(defaults):
                         dest='verbose',
                         help='Be more verbose where possible (default: %(default)s)',
                         default=defaults["verbose"])
+    
+    parser.add_argument('--gzip',
+                        action='store_true',
+                        dest='gzipped',
+                        help='File is a gzipped text file (default: %(default)s)',
+                        default=defaults["gzipped"])
+    
 
     return parser
 
@@ -127,17 +134,27 @@ def convert_tsv(mapping_table, text_in_filename, text_out_filename, verbose=Fals
     
     matched_chroms = {}
     chrom_field = 0
-    
-    with open(text_in_filename, 'r') as orig, open(text_out_filename, 'w') as out:
-        for line in orig:
-            fields = line.split("\t")
-            if fields[chrom_field] in mapping_table:
-                fields[chrom_field] = mapping_table[fields[chrom_field]]
-                out.write("\t".join(fields))
-                matched_chroms[fields[chrom_field]] = 1
-            else:
-                if fields[0] not in matched_chroms:
-                    matched_chroms[fields[chrom_field]] = 0
+
+    if text_in_filename.endswith(".gz"):
+        print("zipped file: "+text_in_filename)
+        orig = gzip.open(text_in_filename,'rt')
+        out = gzip.open(text_out_filename,'wt')
+    else:
+        orig = open(text_in_filename,'r')
+        out = open(text_out_filename,'w')
+        
+    for line in orig:
+        fields = line.split("\t")
+        if fields[chrom_field] in mapping_table:
+            fields[chrom_field] = mapping_table[fields[chrom_field]]
+            out.write("\t".join(fields))
+            matched_chroms[fields[chrom_field]] = 1
+        elif re.match("^#",fields[chrom_field]) or re.match("^track",fields[chrom_field]):
+            out.write("\t".join(fields))
+            print("unchanged line: " + fields[chrom_field])
+        else:
+            if fields[0] not in matched_chroms:
+                matched_chroms[fields[chrom_field]] = 0    
                     
     orig.close()
     out.close()
@@ -203,7 +220,8 @@ def main(args=None):
         'toFormat': 'UCSC',
         'verbose': False,
         'bw_out_filename': None,
-        'base_url': 'https://raw.githubusercontent.com/dpryan79/ChromosomeMappings/master/'
+        'base_url': 'https://raw.githubusercontent.com/dpryan79/ChromosomeMappings/master/',
+        'gzipped': False
     }
 
     args = parse_arguments(defaults).parse_args(args)
@@ -219,10 +237,14 @@ def main(args=None):
             sys.exit("Please use same number of arguments for --outFileName/-o as well as you have input files!")
         elif args.bw_out_filename is not None and len(args.bw_out_filename) == len(args.bw_in_filename):
             bw_out_filename = args.bw_out_filename.index(curr_file)
-        else:
+        elif curr_file.endswith(".gz"):
+            bw_out_filename = re.sub("(.[^.]+.gz)$", ".%s\\1" % (args.to_format + "_chroms"), curr_file)
+        else: 
             bw_out_filename = re.sub("(.[^.]+)$", ".%s\\1" % (args.to_format + "_chroms"), curr_file)
-
-        if is_binary_string(open(curr_file, 'rb').read(1024)):
+        
+        if curr_file.endswith(".gz"):
+            convert_tsv(mapping_table, curr_file, bw_out_filename, args.verbose)
+        elif is_binary_string(open(curr_file, 'rb').read(1024)):
             convert_bigwig(mapping_table, curr_file, bw_out_filename, args.verbose)
         else:
             convert_tsv(mapping_table, curr_file, bw_out_filename, args.verbose)
