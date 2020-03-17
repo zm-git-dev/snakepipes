@@ -8,10 +8,12 @@ source:
 build:
   number: 0
   noarch: python
+  script: "{{PYTHON}} -m pip install . --ignore-installed --no-deps --no-binary :all:"
 
 requirements:
   host:
     - python >=3
+    - pip
   run:
     - python >=3
     - snakemake >=5.7
