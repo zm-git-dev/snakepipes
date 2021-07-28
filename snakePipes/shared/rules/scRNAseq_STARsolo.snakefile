@@ -170,20 +170,20 @@ rule STARsolo_filtered_to_seurat:
 
 
 
-
-rule remove_empty_drops:
-    input:
-        infiles = expand("STARsolo/{sample}/{sample}.Solo.out/Gene/raw/matrix.mtx.gz",sample=samples)
-    output:
-        seurat = "Seurat/STARsolo_raw_RmEmptyDrops/merged_samples.RDS"
-    params:
-        indirs = expand(outdir + "/STARsolo/{sample}/{sample}.Solo.out/Gene/raw",sample=samples),
-        wdir = outdir + "/Seurat/STARsolo_raw_RmEmptyDrops",
-        samples = samples
-    log:
-        out = "Seurat/STARsolo_raw_RmEmptyDrops/logs/seurat.out"
-    conda: CONDA_seurat3_ENV
-    script: "../rscripts/scRNAseq_EmptyDrops.R"
+if filterEmptyDrops:
+    rule remove_empty_drops:
+        input:
+            infiles = expand("STARsolo/{sample}/{sample}.Solo.out/Gene/raw/matrix.mtx.gz",sample=samples)
+        output:
+            seurat = "Seurat/STARsolo_raw_RmEmptyDrops/merged_samples.RDS"
+        params:
+            indirs = expand(outdir + "/STARsolo/{sample}/{sample}.Solo.out/Gene/raw",sample=samples),
+            wdir = outdir + "/Seurat/STARsolo_raw_RmEmptyDrops",
+            samples = samples
+        log:
+            out = "Seurat/STARsolo_raw_RmEmptyDrops/logs/seurat.out"
+        conda: CONDA_seurat3_ENV
+        script: "../rscripts/scRNAseq_EmptyDrops.R"
 
 
 if not skipVelocyto:

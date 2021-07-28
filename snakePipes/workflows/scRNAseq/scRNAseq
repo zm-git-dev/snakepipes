@@ -29,7 +29,9 @@ def parse_args(defaults={"verbose": False, "configFile": None,
                          "plotFormat": "png", "skipRaceID": False,
                          "cellFilterMetric": "gene_universe",
 			 "mode": "STARsolo", "BCwhiteList": None, "STARsoloCoords": ["1","7","8","7"], "myKit": "CellSeq384", "skipVelocyto": False,
-                         "alevinLibraryType":"ISR", "prepProtocol":"celseq2", "salmonIndexOptions": "--type puff -k 31", "expectCells" : None, "readLengthFrx": 0.2}):
+                         "alevinLibraryType":"ISR", "prepProtocol":"celseq2", "salmonIndexOptions": "--type puff -k 31", "expectCells" : None, "readLengthFrx": 0.2,
+                         "filterEmptyDrops": False
+                        }):
     """
     Parse arguments from the command line.
     """
@@ -190,6 +192,12 @@ def parse_args(defaults={"verbose": False, "configFile": None,
                           dest="readLengthFrx",
                           help="Fraction of read length required to align to the intronic sequence (default: '%(default)s')",
                           default=defaults["readLengthFrx"])
+
+    optional.add_argument("--filterEmptyDrops",
+                          dest="filterEmptyDrops",
+                          action="store_true",
+                          default=defaults["filterEmptyDrops"],
+                          help="Flag to run empty drop filtering.")
 
 
     return parser
