@@ -105,9 +105,9 @@ def run_velocyto(skipVelocyto):
 
 def filterEmpty(filterEmptyDrops):
     if filterEmptyDrops:
-	    return "Seurat/STARsolo_raw/merged_samples.RDS"
+	    return(["Seurat/STARsolo_raw/merged_samples.RDS"])
     else:
-	    return ""
+	    return([])
 
 ### execute before workflow starts #############################################
 ################################################################################
@@ -184,7 +184,7 @@ elif mode=="STARsolo":
             "multiQC/multiqc_report.html",
             "Seurat/STARsolo_filtered/merged_samples.RDS",
             "Seurat/STARsolo_raw/merged_samples.RDS",
-	    filterEmpty(filterEmptyDrops)
+	    filterEmpty(filterEmptyDrops),
             run_velocyto(skipVelocyto)
 elif mode=="Alevin":
     localrules: filter_gtf, gtf_to_files, cut_t2g
