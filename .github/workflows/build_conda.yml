@@ -22,4 +22,4 @@ jobs:
     - name: Install dependencies
       run: |
         $CONDA/bin/conda create -n foo -q --yes --quiet -c conda-forge -c bioconda snakemake=6.2.1 fuzzywuzzy mock sphinx sphinx-argparse sphinx_rtd_theme flake8 coreutils mamba python=3.9
-        $CONDA/bin/conda run -n foo python python -m pip install . --no-deps --ignore-installed -vvv
+        $CONDA/bin/conda run -n foo python -m pip install . --no-deps --ignore-installed -vvv
