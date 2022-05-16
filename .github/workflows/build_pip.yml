@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: [ubuntu-latest, macOS-latest]
+    runs-on: ubuntu-latest
     strategy:
       max-parallel: 5
       matrix:
@@ -18,7 +18,16 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
+      uses: actions/setup-python@v3
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         python -m pip install . --no-deps --ignore-installed -vvv
+    - name: Run CI
+      uses: actions/setup-python@v3
+        ./.ci_stuff/test_dag.sh
+    - name: Docs
+      uses: actions/setup-python@v3
+        cd docs
+        make html
+
