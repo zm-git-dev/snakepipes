@@ -24,10 +24,10 @@ jobs:
         pip install -r requirements.txt
         python -m pip install . --no-deps --ignore-installed -vvv
     - name: Run CI
-      uses: actions/setup-python@v3
+      run: |
         ./.ci_stuff/test_dag.sh
     - name: Docs
-      uses: actions/setup-python@v3
+      run: |
         cd docs
         make html
 
