@@ -65,17 +65,17 @@ rule plotCoverage:
         "deepTools_qc/plotCoverage/read_coverage.tsv"
     params:
         labels = " ".join(samples),
-        read_extension = "--extendReads" if pairedEnd
-                         else "--extendReads {}".format(fragmentLength),
-        plotcmd = "" if plotFormat == 'None' else
+        read_extension = "--extendReads" if config['pairedEnd']
+                         else "--extendReads {}".format(config['fragmentLength']),
+        plotcmd = "" if config['plotFormat'] == 'None' else
                     "--plotFile deepTools_qc/plotCoverage/read_coverage.{}".format(plotFormat)
     log:
         out = "deepTools_qc/logs/plotCoverage.out",
         err = "deepTools_qc/logs/plotCoverage.err"
     benchmark:
         "deepTools_qc/.benchmark/plotCoverage.benchmark"
-    threads: lambda wildcards: 24 if 24<max_thread else max_thread
-    conda: CONDA_SHARED_ENV
+    threads: lambda wildcards: 24 if 24<config['max_thread'] else config['max_thread']
+    conda: config['CONDA_SHARED_ENV']
     shell: plotCoverage_cmd
 
 ### deepTools multiBamSummary ##################################################
