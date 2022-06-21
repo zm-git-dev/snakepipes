@@ -19,14 +19,12 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        python -m pip install . --no-deps --ignore-installed -vvv
         $CONDA/bin/conda install -y -n base -c conda-forge mamba
+        $CONDA/bin/conda create -n foo -q --yes --quiet -c conda-forge -c bioconda snakemake=6.2.1 fuzzywuzzy mock sphinx sphinx-argparse sphinx_rtd_theme flake8 coreutils mamba python=3.9
+        $CONDA/bin/conda run -n foo python -m pip install . --no-deps --ignore-installed -vvv
     - name: build envs
       run: |
-        which mamba
-        snakePipes createEnvs --force --condaDir /tmp/envs/
+        $CONDA/bin/conda run -n foo snakePipes createEnvs --force --condaDir $CONDA/envs/
     - name: Run CI
       run: |
         ./.ci_stuff/test_dag.sh
