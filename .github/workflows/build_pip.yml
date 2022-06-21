@@ -26,7 +26,7 @@ jobs:
     - name: build envs
       run: |
         which mamba
-        snakePipes createEnvs --force --condaDir $CONDA/envs/
+        snakePipes createEnvs --force --condaDir /tmp/envs/
     - name: Run CI
       run: |
         ./.ci_stuff/test_dag.sh
