@@ -304,7 +304,9 @@ def createCondaEnvs(args):
                 ))
                 print("Using cmd = {}".format(cmd))
                 try:
+                    print("Trying mkdir")
                     os.makedirs(os.path.join(condaDirUse, h), exist_ok=True)
+                    print("Trying sp")
                     subprocess.check_call(cmd)
                 except:
                     # Ensure an environment is fully removed on error
