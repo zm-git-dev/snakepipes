@@ -25,7 +25,8 @@ jobs:
         $CONDA/bin/conda install -y -n base -c conda-forge mamba
     - name: build envs
       run: |
-        snakePipes createEnvs --force
+        which mamba
+        snakePipes createEnvs --force --condaDir $CONDA/envs/
     - name: Run CI
       run: |
         ./.ci_stuff/test_dag.sh
