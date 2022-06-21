@@ -22,6 +22,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         python -m pip install . --no-deps --ignore-installed -vvv
+        $CONDA/bin/conda install -n base -c conda-forge mamba
+    - name: build envs
+      run: |
+        snakePipes createEnvs --force
     - name: Run CI
       run: |
         ./.ci_stuff/test_dag.sh
