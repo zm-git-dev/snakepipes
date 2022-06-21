@@ -22,7 +22,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         python -m pip install . --no-deps --ignore-installed -vvv
-        $CONDA/bin/conda install -n base -c conda-forge mamba
+        $CONDA/bin/conda install -y -n base -c conda-forge mamba
     - name: build envs
       run: |
         snakePipes createEnvs --force --condaDir $CONDA/envs
