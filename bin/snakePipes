@@ -296,6 +296,13 @@ def createCondaEnvs(args):
         # Don't actually create the env if either --info is set or it already exists and --force is NOT set
         if not args.info:
             if not os.path.exists(os.path.join(condaDirUse, h)) or args.force:
+                print("Trying to install in {} and condaDirUse exists = {}".format(
+                    os.path.join(condaDirUse, h),
+                    os.path.exists(
+                        condaDirUse
+                    )
+                ))
+                print("Using cmd = {}".format(cmd))
                 try:
                     os.makedirs(os.path.join(condaDirUse, h), exist_ok=True)
                     subprocess.check_call(cmd)
