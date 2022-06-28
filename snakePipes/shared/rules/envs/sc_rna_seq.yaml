@@ -7,10 +7,10 @@ dependencies:
  - samtools = 1.15.1
  - star = 2.7.10a
  - r-base = 4.1.3
- - r-stringr = 1.3.1
- - r-data.table = 1.14.2
+ - r-stringr
+ - r-data.table
  - r-seurat = 4.1.1 
- - r-gtools = 3.8.1
- - r-dplyr = 1.0.9
+ - r-gtools
+ - r-dplyr
  - h5py = 3.6.0
  - velocyto.py = 0.17.17 
