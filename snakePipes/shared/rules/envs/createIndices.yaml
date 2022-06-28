@@ -11,4 +11,4 @@ dependencies:
  - star = 2.7.10a
  - bwa = 0.7.17
  - bwameth = 0.2.5
- - tbb = 2021.5.0
+ - tbb

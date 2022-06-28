@@ -281,7 +281,7 @@ snakePipes/shared/rules/envs/sc_rna_seq_alevinqc.yaml
 snakePipes/shared/rules/envs/sc_rna_seq_eisaR.yaml
 snakePipes/shared/rules/envs/sc_rna_seq_loompy.yaml
 snakePipes/shared/rules/envs/sc_rna_seq_loompy.yaml~
-snakePipes/shared/rules/envs/sc_rna_seq_seurat3.yaml
+snakePipes/shared/rules/envs/sc_rna_seq_seurat.yaml
 snakePipes/shared/rules/envs/sc_rna_seq_seurat3.yaml~
 snakePipes/shared/rules/envs/shared.yaml
 snakePipes/shared/rules/envs/wgbs.yaml
